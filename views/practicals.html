@@ -1,0 +1,50 @@
+<div class="practicals-page">
+
+  <div class="page-header">
+    <h2>Practical Lab Tracker</h2>
+    <div class="progress-summary">
+      <span class="progress-count">Completed: {{ completedCount() }} / 30</span>
+      <div class="progress-bar-wrap">
+        <div class="progress-bar-fill" ng-style="{'width': (completedCount() / 30 * 100) + '%'}"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="practicals-list">
+    <div class="practical-item" ng-repeat="p in practicals track by p.id"
+         ng-class="{'practical-done': p.completed}">
+
+      <!-- Practical Header Row -->
+      <div class="practical-header">
+        <span class="practical-num">{{ p.id }}.</span>
+        <span class="practical-title-text">{{ p.title }}</span>
+        <span class="status-badge" ng-class="p.completed ? 'badge-done' : 'badge-pending'">
+          {{ p.completed ? 'Done' : 'Pending' }}
+        </span>
+        <div class="practical-actions">
+          <button class="btn-code" ng-click="toggleCode(p)">
+            {{ p.showCode ? '▲ Hide Code' : '▼ View Code' }}
+          </button>
+          <button class="toggle-btn" ng-click="toggleComplete(p)">
+            {{ p.completed ? 'Mark Pending' : 'Mark Done' }}
+          </button>
+        </div>
+      </div>
+
+      <!-- Expandable Code Section (no reload) -->
+      <div class="practical-detail" ng-if="p.showCode">
+        <p class="aim-text"><strong>Aim:</strong> {{ p.aim }}</p>
+        <div class="code-block">
+          <div class="code-label">Code</div>
+          <pre>{{ p.code }}</pre>
+        </div>
+        <div class="notes-row">
+          <input class="notes-input" type="text" placeholder="Add your notes here..."
+                 ng-model="p.notes" ng-change="saveNotes()" />
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>

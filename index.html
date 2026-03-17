@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="learningPortalApp">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <title>Unified Learning Management Portal</title>
+  <link rel="stylesheet" href="css/style.css?v=2" />
+</head>
+<body>
+
+  <!-- Navigation Bar -->
+  <header class="navbar">
+    <a href="#!/overview" class="brand">&#127979; Learning Portal</a>
+    <nav>
+      <a href="#!/overview">Course Overview</a>
+      <a href="#!/practicals">Practicals</a>
+      <a href="#!/references">References</a>
+    </nav>
+  </header>
+
+  <!-- SPA View Outlet -->
+  <div class="container">
+    <div ng-view></div>
+  </div>
+
+  <!-- AngularJS 1.x CDN -->
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.3/angular.min.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.3/angular-route.min.js"></script>
+
+  <!-- App Module & Config -->
+  <script src="app.js?v=2"></script>
+
+  <!-- Service -->
+  <script src="services/dataService.js?v=2"></script>
+
+  <!-- Controllers -->
+  <script src="controllers/dashboardCtrl.js?v=2"></script>
+  <script src="controllers/submissionCtrl.js?v=2"></script>
+  <script src="controllers/labCtrl.js?v=2"></script>
+  <script src="controllers/referencesCtrl.js?v=2"></script>
+
+  <!-- Directives -->
+  <script src="directives/statusCard.js?v=2"></script>
+
+</body>
+</html>

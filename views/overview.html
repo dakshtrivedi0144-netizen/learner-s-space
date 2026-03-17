@@ -1,0 +1,107 @@
+<div class="overview-page">
+
+  <!-- Student Info Banner -->
+  <div class="info-banner">
+    <h2>Unified Learning Management Portal</h2>
+    <p>{{ studentInfo.course }} &mdash; {{ studentInfo.subject }}</p>
+  </div>
+
+  <!-- Module & Content Explorer -->
+  <section class="module-explorer card">
+    <h3>Module &amp; Content Explorer</h3>
+
+    <div class="search-bar">
+      <input type="text" ng-model="searchTerm" placeholder="Search topics (e.g. MVC architecture, CDN)..." class="search-input" />
+      <label>Sort by:
+        <select ng-model="sortField">
+          <option value="hours">Hours</option>
+          <option value="id">Unit Number</option>
+          <option value="title">Title</option>
+        </select>
+      </label>
+    </div>
+
+    <div class="unit-list">
+      <div class="unit-card" ng-repeat="unit in syllabus | orderBy:sortField">
+        <h4>{{ unit.title | lowercase }} <span class="hours-badge">{{ unit.hours }} hrs</span></h4>
+
+        <ul class="topic-list">
+          <li ng-repeat="topic in unit.topics | filter:{name: searchTerm}" class="topic-item">
+            <div class="topic-header" ng-click="topic.showDetail = !topic.showDetail">
+              <span class="topic-name">{{ topic.name }}</span>
+              <span class="topic-toggle">{{ topic.showDetail ? '▲ Hide' : '▼ Learn' }}</span>
+            </div>
+            <div class="topic-detail" ng-if="topic.showDetail">
+              <p class="topic-material">{{ topic.material }}</p>
+              <div class="code-block">
+                <div class="code-label">Example</div>
+                <pre>{{ topic.example }}</pre>
+              </div>
+            </div>
+          </li>
+        </ul>
+
+        <p class="no-results" ng-if="(unit.topics | filter:{name: searchTerm}).length === 0">No results found.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Submission & Validation Engine -->
+  <section class="submission-engine card" ng-controller="SubmissionCtrl">
+    <h3>Assignment Submission</h3>
+
+    <div class="confirmation-msg" ng-if="confirmationMessage">
+      <p>&#10003; {{ confirmationMessage }}</p>
+    </div>
+
+    <form name="submissionForm" novalidate>
+
+      <!-- Student Name -->
+      <div class="form-group">
+        <label>Student Name *</label>
+        <input type="text" name="studentName" ng-model="submission.name" required
+               ng-class="{'field-invalid': submissionForm.studentName.$invalid && submissionForm.studentName.$touched}" />
+        <span class="error-msg" ng-if="submissionForm.studentName.$invalid && submissionForm.studentName.$touched">
+          Name is required.
+        </span>
+      </div>
+
+      <!-- Roll Number -->
+      <div class="form-group">
+        <label>Roll Number *</label>
+        <input type="text" name="rollNumber" ng-model="submission.rollNumber" required ng-pattern="/^\d+$/"
+               ng-class="{'field-invalid': submissionForm.rollNumber.$invalid && submissionForm.rollNumber.$touched}" />
+        <span class="error-msg" ng-if="submissionForm.rollNumber.$error.required && submissionForm.rollNumber.$touched">
+          Roll number is required.
+        </span>
+        <span class="error-msg" ng-if="submissionForm.rollNumber.$error.pattern && submissionForm.rollNumber.$touched">
+          Roll number must contain only digits.
+        </span>
+      </div>
+
+      <!-- Submission Content -->
+      <div class="form-group">
+        <label>Submission Content *</label>
+        <textarea name="content" ng-model="submission.content" required rows="4"
+                  ng-class="{'field-invalid': submissionForm.content.$invalid && submissionForm.content.$touched}"></textarea>
+        <span class="error-msg" ng-if="submissionForm.content.$invalid && submissionForm.content.$touched">
+          Submission content is required.
+        </span>
+      </div>
+
+      <div class="form-meta">
+        <span ng-if="submissionForm.$pristine" class="form-state">Form state: Pristine</span>
+        <span ng-if="submissionForm.$dirty && submissionForm.$valid" class="form-state valid">Form state: Ready to submit</span>
+        <span ng-if="submissionForm.$dirty && submissionForm.$invalid" class="form-state invalid">Form state: Has errors</span>
+      </div>
+
+      <button type="submit" class="submit-btn"
+              ng-disabled="submissionForm.$pristine || submissionForm.$invalid"
+              ng-click="submitForm(submissionForm)">
+        Submit Assignment
+      </button>
+
+    </form>
+  </section>
+
+</div>

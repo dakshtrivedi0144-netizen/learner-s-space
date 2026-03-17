@@ -1,0 +1,30 @@
+<div class="references-page">
+
+  <div class="page-header">
+    <h2>References &amp; Textbooks</h2>
+    <p>Required reading for the AngularJS course.</p>
+  </div>
+
+  <!-- Loading State -->
+  <div class="loading-indicator" ng-if="loading">
+    <div class="spinner"></div>
+    <p>Loading textbooks...</p>
+  </div>
+
+  <!-- Error State -->
+  <div class="error-box" ng-if="error">
+    <p>&#9888; {{ error }}</p>
+  </div>
+
+  <!-- Textbook List -->
+  <div class="textbook-list" ng-if="!loading && !error">
+    <div class="textbook-card" ng-repeat="book in textbooks">
+      <div class="book-icon">&#128218;</div>
+      <div class="book-info">
+        <h4>{{ book.title }}</h4>
+        <p>by {{ book.author }}</p>
+      </div>
+    </div>
+  </div>
+
+</div>
