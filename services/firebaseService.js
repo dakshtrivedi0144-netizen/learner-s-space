@@ -11,6 +11,15 @@ var firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 var db = firebase.firestore();
 
+// Enable offline persistence so app works even with brief disconnects
+db.enablePersistence({ synchronizeTabs: true }).catch(function(err) {
+  if (err.code === 'failed-precondition') {
+    console.warn('Multiple tabs open — persistence only in one tab.');
+  } else if (err.code === 'unimplemented') {
+    console.warn('Browser does not support offline persistence.');
+  }
+});
+
 angular.module('learningPortalApp')
 .factory('FirebaseService', ['$q', function($q) {
 
