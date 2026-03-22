@@ -967,7 +967,7 @@ body {
 .pill:hover { border-color: #c0392b; color: #c0392b; }
 .pill.active { background: #c0392b; border-color: #c0392b; color: #fff; font-weight: 600; }
 
-.faculty-tabs, .admin-tabs { display: flex; gap: 0.4rem; margin-bottom: 1.2rem; flex-wrap: wrap; }
+.faculty-tabs, .admin-tabs { display: flex; gap: 0.4rem; margin-bottom: 1.2rem; flex-wrap: wrap; overflow-x: auto; padding-bottom: 4px; }
 .ftab { padding: 9px 20px; border: 1.5px solid #ddd; background: #fff; border-radius: 8px; font-size: 0.88rem; cursor: pointer; transition: all 0.2s; color: #555; }
 .ftab:hover { border-color: #c0392b; color: #c0392b; }
 .ftab.active { background: #c0392b; border-color: #c0392b; color: #fff; font-weight: 600; }
