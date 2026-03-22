@@ -7,20 +7,39 @@ angular.module('learningPortalApp')
     $location.path('/home'); return;
   }
 
-  $scope.subjects = [
-    { id: 'angularjs', name: 'AngularJS', icon: '🅰️' },
-    { id: 'cloud-computing', name: 'Cloud Computing', icon: '☁️' },
-    { id: 'dm-dw', name: 'Data Mining & DW', icon: '⛏️' }
+  var ALL_SUBJECTS = [
+    { id: 'angularjs',       name: 'AngularJS',        icon: '🅰️' },
+    { id: 'cloud-computing', name: 'Cloud Computing',  icon: '☁️' },
+    { id: 'dm-dw',           name: 'Data Mining & DW', icon: '⛏️' }
   ];
 
-  $scope.selected = {};
-  $scope.tab = 'practicals';
-  $scope.editPracticals = [];
-  $scope.uploadAllowed = false;
-  $scope.submissions = [];
-  $scope.saving = false;
-  $scope.saveMsg = '';
+  $scope.subjects  = [];
+  $scope.selected  = {};
+  $scope.tab       = 'practicals';
+  $scope.editPracticals  = [];
+  $scope.uploadAllowed   = false;
+  $scope.submissions     = [];
+  $scope.saving          = false;
+  $scope.saveMsg         = '';
+  $scope.loadingSubjects = true;
   $scope.loadingSubmissions = false;
+
+  // Admin sees all subjects; faculty sees only assigned ones
+  if (user.role === 'admin') {
+    $scope.subjects = ALL_SUBJECTS;
+    $scope.loadingSubjects = false;
+  } else {
+    FirebaseService.getFacultySubjects(user.regNo).then(function(assigned) {
+      $scope.loadingSubjects = false;
+      if (!assigned || assigned.length === 0) {
+        $scope.subjects = [];
+      } else {
+        $scope.subjects = ALL_SUBJECTS.filter(function(s) {
+          return assigned.indexOf(s.id) !== -1;
+        });
+      }
+    });
+  }
 
   $scope.selectSubject = function(s) {
     $scope.selected = s;

@@ -2,7 +2,7 @@
   <div class="admin-header">
     <div>
       <h2>🛡️ Admin Panel</h2>
-      <p>Manage users, roles and platform settings</p>
+      <p>Manage users, roles and subject assignments</p>
     </div>
     <div class="admin-stats">
       <div class="stat-box"><span class="stat-num">{{ users.length }}</span><span class="stat-label">Total Users</span></div>
@@ -12,11 +12,12 @@
   </div>
 
   <div class="admin-tabs">
-    <button class="ftab" ng-class="{active: tab==='users'}" ng-click="tab='users'">👥 Users</button>
-    <button class="ftab" ng-class="{active: tab==='roles'}" ng-click="tab='roles'">🔑 Role Management</button>
+    <button class="ftab" ng-class="{active: tab==='users'}"       ng-click="tab='users'">👥 Users</button>
+    <button class="ftab" ng-class="{active: tab==='roles'}"       ng-click="tab='roles'">🔑 Role Management</button>
+    <button class="ftab" ng-class="{active: tab==='assignments'}" ng-click="tab='assignments'">📚 Subject Assignments</button>
   </div>
 
-  <div class="admin-toolbar">
+  <div class="admin-toolbar" ng-if="tab !== 'assignments'">
     <input type="text" class="admin-search" placeholder="🔍 Search name, reg no, branch..." ng-model="searchTerm" />
     <select class="admin-filter" ng-model="filterSem">
       <option value="">All Semesters</option>
@@ -30,11 +31,11 @@
     </select>
   </div>
 
-  <div class="admin-loading" ng-if="loading"><div class="spinner"></div><p>Loading users...</p></div>
-  <div class="admin-error" ng-if="error">⚠️ {{ error }}</div>
+  <div class="admin-loading" ng-if="loading"><div class="spinner"></div><p>Loading...</p></div>
+  <div class="admin-error"  ng-if="error">⚠️ {{ error }}</div>
   <div class="save-alert success" ng-if="actionMsg">✅ {{ actionMsg }}</div>
 
-  <!-- USERS TABLE -->
+  <!-- ── USERS TABLE ── -->
   <div class="admin-table-wrap" ng-if="!loading && tab==='users'">
     <table class="admin-table">
       <thead>
@@ -55,7 +56,7 @@
     </table>
   </div>
 
-  <!-- ROLE MANAGEMENT -->
+  <!-- ── ROLE MANAGEMENT ── -->
   <div class="admin-table-wrap" ng-if="!loading && tab==='roles'">
     <table class="admin-table">
       <thead>
@@ -76,10 +77,50 @@
           </td>
           <td>
             <button class="btn-role-save" ng-click="updateRole(u)">Update</button>
-            <button class="btn-role-del" ng-click="deleteUser(u)">Delete</button>
+            <button class="btn-role-del"  ng-click="deleteUser(u)">Delete</button>
           </td>
         </tr>
       </tbody>
     </table>
+  </div>
+
+  <!-- ── SUBJECT ASSIGNMENTS ── -->
+  <div ng-if="!loading && tab==='assignments'">
+
+    <div class="assign-info-bar">
+      <span>📌 Assign subjects to faculty members. Faculty can only manage their assigned subjects.</span>
+    </div>
+
+    <div ng-if="facultyList.length === 0" class="no-data" style="padding:2rem;text-align:center;">
+      No faculty members found. Promote users to Faculty role first.
+    </div>
+
+    <div class="assign-grid" ng-if="facultyList.length > 0">
+      <div class="assign-card" ng-repeat="f in facultyList track by f.regNo">
+        <div class="assign-card-header">
+          <span class="user-avatar">{{ f.name[0] }}</span>
+          <div>
+            <div class="assign-name">{{ f.name }}</div>
+            <code class="assign-reg">{{ f.regNo }}</code>
+          </div>
+        </div>
+
+        <div class="assign-subjects">
+          <div class="assign-subject-row" ng-repeat="s in allSubjects">
+            <label class="assign-label">
+              <input type="checkbox"
+                     ng-checked="isAssigned(f.regNo, s.id)"
+                     ng-click="toggleSubject(f.regNo, s.id)" />
+              <span class="assign-subject-name">{{ s.icon }} {{ s.name }}</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="assign-summary">
+          <span class="assign-summary-text">{{ assignedNames(f.regNo) }}</span>
+        </div>
+      </div>
+    </div>
+
   </div>
 </div>

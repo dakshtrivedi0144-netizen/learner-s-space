@@ -9,8 +9,16 @@
   <!-- Subject Selector -->
   <div class="faculty-section">
     <label class="section-label">Select Subject</label>
-    <div class="subject-pills">
-      <button class="pill" ng-repeat="s in subjects" ng-class="{active: selected.subject === s.id}" ng-click="selectSubject(s)">
+
+    <div class="admin-loading" ng-if="loadingSubjects"><div class="spinner"></div></div>
+
+    <div ng-if="!loadingSubjects && subjects.length === 0" class="no-subjects-msg">
+      <span>📭</span>
+      <p>No subjects assigned yet. Please contact the Admin to get subjects assigned to you.</p>
+    </div>
+
+    <div class="subject-pills" ng-if="!loadingSubjects && subjects.length > 0">
+      <button class="pill" ng-repeat="s in subjects" ng-class="{active: selected.id === s.id}" ng-click="selectSubject(s)">
         {{ s.icon }} {{ s.name }}
       </button>
     </div>

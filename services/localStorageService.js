@@ -3,11 +3,12 @@ angular.module('learningPortalApp')
 
   // ── KEYS ──────────────────────────────────────────────
   var KEYS = {
-    users:      'ulp_users',
-    syllabus:   'ulp_syllabus',
-    practicals: 'ulp_practicals',
-    settings:   'ulp_settings',
-    labManuals: 'ulp_labManuals'
+    users:       'ulp_users',
+    syllabus:    'ulp_syllabus',
+    practicals:  'ulp_practicals',
+    settings:    'ulp_settings',
+    labManuals:  'ulp_labManuals',
+    assignments: 'ulp_assignments'   // { regNo: ['angularjs', 'cloud-computing', ...] }
   };
 
   function get(key) {
@@ -112,6 +113,23 @@ angular.module('learningPortalApp')
       var all = get(KEYS.settings);
       all[subjectId] = { uploadAllowed: allowed };
       set(KEYS.settings, all);
+      return resolved();
+    },
+
+    // ── ADMIN: SUBJECT ASSIGNMENTS ────────────────────────
+    getAssignments: function() {
+      return resolved(get(KEYS.assignments));
+    },
+
+    getFacultySubjects: function(regNo) {
+      var all = get(KEYS.assignments);
+      return resolved(all[regNo] || []);
+    },
+
+    setFacultySubjects: function(regNo, subjects) {
+      var all = get(KEYS.assignments);
+      all[regNo] = subjects;
+      set(KEYS.assignments, all);
       return resolved();
     },
 

@@ -1056,3 +1056,103 @@ input:checked + .slider:before { transform: translateX(26px); }
   .practical-edit-item { flex-direction: column; }
   .pei-num { align-self: flex-start; }
 }
+
+/* ===== Subject Assignment (Admin) ===== */
+.assign-info-bar {
+  background: #eaf4fb;
+  border: 1.5px solid #aed6f1;
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-bottom: 1.2rem;
+  font-size: 0.88rem;
+  color: #2471a3;
+}
+
+.assign-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.2rem;
+}
+
+.assign-card {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+  padding: 1.2rem;
+  border-top: 4px solid #c0392b;
+}
+
+.assign-card-header {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  margin-bottom: 1rem;
+}
+
+.assign-name {
+  font-weight: 700;
+  color: #2c3e50;
+  font-size: 0.95rem;
+}
+
+.assign-reg {
+  font-size: 0.78rem;
+  color: #7f8c8d;
+}
+
+.assign-subjects {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.assign-subject-row { }
+
+.assign-label {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  cursor: pointer;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1.5px solid #eee;
+  transition: all 0.15s;
+  font-size: 0.88rem;
+  color: #444;
+}
+
+.assign-label:hover { border-color: #c0392b; background: #fef9f9; }
+
+.assign-label input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: #c0392b;
+  cursor: pointer;
+}
+
+.assign-subject-name { font-size: 0.88rem; }
+
+.assign-summary {
+  border-top: 1px solid #f0f2f5;
+  padding-top: 0.7rem;
+}
+
+.assign-summary-text {
+  font-size: 0.78rem;
+  color: #7f8c8d;
+  font-style: italic;
+}
+
+/* No subjects message (faculty) */
+.no-subjects-msg {
+  background: #fef9e7;
+  border: 1.5px solid #f9e79f;
+  border-radius: 10px;
+  padding: 1.5rem;
+  text-align: center;
+  color: #7d6608;
+}
+
+.no-subjects-msg span { font-size: 2rem; display: block; margin-bottom: 0.5rem; }
+.no-subjects-msg p { font-size: 0.9rem; }
