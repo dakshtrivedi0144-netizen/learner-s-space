@@ -17,54 +17,60 @@ angular.module('learningPortalApp')
 
   return {
 
-    // Register new user
+    // Register new user — use regNo as document ID to prevent duplicates
     register: function(userData) {
       var deferred = $q.defer();
-      // Check if regNo already exists
-      db.collection('users').where('regNo', '==', userData.regNo).get()
-        .then(function(snapshot) {
-          if (!snapshot.empty) {
-            deferred.reject('Registration number already exists.');
-            return;
-          }
-          return db.collection('users').add({
-            name: userData.name,
-            regNo: userData.regNo,
-            faculty: userData.faculty,
-            branch: userData.branch,
-            semester: userData.semester,
-            field: userData.field || '',
-            password: userData.password,
-            createdAt: firebase.firestore.FieldValue.serverTimestamp()
-          });
-        })
-        .then(function(docRef) {
-          if (docRef) deferred.resolve(docRef);
-        })
-        .catch(function(err) {
-          deferred.reject(err.message || 'Registration failed.');
+      var docRef = db.collection('users').doc(userData.regNo.toUpperCase());
+      docRef.get().then(function(doc) {
+        if (doc.exists) {
+          deferred.reject('Registration number already exists.');
+          return;
+        }
+        return docRef.set({
+          name: userData.name,
+          regNo: userData.regNo.toUpperCase(),
+          faculty: userData.faculty,
+          branch: userData.branch,
+          semester: userData.semester,
+          field: userData.field || '',
+          password: userData.password,
+          createdAt: new Date().toISOString()
         });
+      }).then(function() {
+        deferred.resolve();
+      }).catch(function(err) {
+        if (err && err.code === 'permission-denied') {
+          deferred.reject('Database permission denied. Please contact admin.');
+        } else {
+          deferred.reject(err.message || 'Registration failed. Check your connection.');
+        }
+      });
       return deferred.promise;
     },
 
-    // Login user
+    // Login user — fetch by regNo doc ID directly (fast single read)
     login: function(regNo, password) {
       var deferred = $q.defer();
-      db.collection('users')
-        .where('regNo', '==', regNo)
-        .where('password', '==', password)
-        .get()
-        .then(function(snapshot) {
-          if (snapshot.empty) {
+      db.collection('users').doc(regNo.toUpperCase()).get()
+        .then(function(doc) {
+          if (!doc.exists) {
             deferred.reject('Invalid registration number or password.');
-          } else {
-            var user = snapshot.docs[0].data();
-            user.id = snapshot.docs[0].id;
-            deferred.resolve(user);
+            return;
           }
+          var user = doc.data();
+          if (user.password !== password) {
+            deferred.reject('Invalid registration number or password.');
+            return;
+          }
+          user.id = doc.id;
+          deferred.resolve(user);
         })
         .catch(function(err) {
-          deferred.reject(err.message || 'Login failed.');
+          if (err && err.code === 'permission-denied') {
+            deferred.reject('Database permission denied. Please contact admin.');
+          } else {
+            deferred.reject(err.message || 'Login failed. Check your connection.');
+          }
         });
       return deferred.promise;
     }
