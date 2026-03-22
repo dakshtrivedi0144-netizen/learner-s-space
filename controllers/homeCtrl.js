@@ -38,7 +38,8 @@ angular.module('learningPortalApp')
         links: { syllabus: '#!/overview', lab: '#!/practicals', references: '#!/references' } },
       { name: 'Cloud Computing', code: '23UGCE610', credits: 4, icon: '☁️',
         links: { syllabus: '#!/cc-overview', lab: '#!/cc-practicals' } },
-      { name: 'Artificial Intelligence', code: '23UGCE6XX', credits: 4, icon: '🤖', comingSoon: true },
+      { name: 'Data Mining & Data Warehousing', code: '23UGCE602', credits: 4, icon: '⛏️',
+        links: { syllabus: '#!/dm-overview', lab: '#!/dm-practicals' } },
       { name: 'Information Security', code: '23UGCE6XX', credits: 4, icon: '🔒', comingSoon: true }
     ],
     7: [

@@ -37,5 +37,14 @@ angular.module('learningPortalApp', ['ngRoute'])
       templateUrl: 'views/cc-practicals.html',
       controller: 'CCLabCtrl'
     })
+    // Data Mining & DW (6th Sem)
+    .when('/dm-overview', {
+      templateUrl: 'views/dm-overview.html',
+      controller: 'DMDashboardCtrl'
+    })
+    .when('/dm-practicals', {
+      templateUrl: 'views/dm-practicals.html',
+      controller: 'DMLabCtrl'
+    })
     .otherwise({ redirectTo: '/home' });
 }]);

@@ -1,0 +1,35 @@
+<div class="overview-page">
+  <div class="student-info-bar">
+    <span>{{ studentInfo.course }}</span>
+    <span class="subject-badge">{{ studentInfo.subject }}</span>
+  </div>
+  <div class="module-explorer">
+    <div class="explorer-header">
+      <h2>Module Explorer</h2>
+      <div class="explorer-controls">
+        <input type="text" class="search-box" placeholder="Search topics..." ng-model="searchTerm" />
+        <select class="sort-select" ng-model="sortField">
+          <option value="hours">Sort by Hours</option>
+          <option value="id">Sort by Unit</option>
+          <option value="title">Sort by Title</option>
+        </select>
+      </div>
+    </div>
+    <div class="unit-list">
+      <div class="unit-card" ng-repeat="unit in syllabus | orderBy:sortField">
+        <div class="unit-header" ng-click="unit.open = !unit.open">
+          <span class="unit-title">{{ unit.title }}</span>
+          <span class="unit-hours">{{ unit.hours }} hrs</span>
+          <span class="unit-toggle">{{ unit.open ? '▲' : '▼' }}</span>
+        </div>
+        <div class="unit-topics" ng-if="unit.open">
+          <div class="topic-row" ng-repeat="topic in unit.topics | filter:searchTerm">
+            <div class="topic-name">{{ topic.name }}</div>
+            <div class="topic-material">{{ topic.material }}</div>
+            <div class="topic-example"><strong>Example:</strong> {{ topic.example }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
