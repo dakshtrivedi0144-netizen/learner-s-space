@@ -10,35 +10,47 @@ body {
 /* ===== Navbar ===== */
 .navbar {
   background: #c0392b;
-  padding: 0 24px;
+  padding: 0 20px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   height: 56px;
   box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  flex-wrap: nowrap;
+  overflow: hidden;
 }
 
 .navbar .brand {
   color: #fff;
-  font-size: 1.1rem;
+  font-size: 1rem;
   font-weight: 700;
   text-decoration: none;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.navbar nav {
+  display: flex;
+  align-items: center;
+  flex-wrap: nowrap;
+  gap: 4px;
+  overflow: hidden;
 }
 
 .navbar nav a {
   color: rgba(255,255,255,0.85);
   text-decoration: none;
-  margin-left: 24px;
-  font-size: 0.95rem;
-  padding: 6px 0;
-  border-bottom: 2px solid transparent;
+  font-size: 0.85rem;
+  padding: 6px 10px;
+  border-radius: 6px;
+  white-space: nowrap;
   transition: all 0.2s;
 }
 
 .navbar nav a:hover,
 .navbar nav a.active {
   color: #fff;
-  border-bottom-color: #fff;
+  background: rgba(255,255,255,0.15);
 }
 
 /* ===== Page Container ===== */
@@ -690,35 +702,49 @@ body {
 /* ===== Navbar User Info ===== */
 .nav-user {
   color: rgba(255,255,255,0.9);
-  font-size: 0.9rem;
-  margin-left: 24px;
+  font-size: 0.82rem;
+  margin-left: 4px;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
+  white-space: nowrap;
+  background: rgba(255,255,255,0.12);
+  padding: 4px 10px;
+  border-radius: 20px;
 }
 
 .nav-badge {
-  background: rgba(255,255,255,0.2);
-  padding: 2px 8px;
+  background: rgba(255,255,255,0.25);
+  padding: 2px 7px;
   border-radius: 12px;
-  font-size: 0.78rem;
+  font-size: 0.72rem;
   font-weight: 600;
 }
 
 .nav-logout {
-  color: rgba(255,255,255,0.8) !important;
-  margin-left: 16px !important;
+  color: rgba(255,255,255,0.85) !important;
   cursor: pointer;
-  font-size: 0.85rem !important;
-  border: 1px solid rgba(255,255,255,0.3) !important;
-  padding: 4px 12px !important;
+  font-size: 0.82rem !important;
+  border: 1px solid rgba(255,255,255,0.35) !important;
+  padding: 5px 12px !important;
   border-radius: 6px;
   transition: all 0.2s;
+  white-space: nowrap;
 }
 
 .nav-logout:hover {
-  background: rgba(255,255,255,0.15);
+  background: rgba(255,255,255,0.2) !important;
   color: #fff !important;
+}
+
+.nav-admin {
+  color: #ffd700 !important;
+  font-weight: 700 !important;
+}
+
+.nav-faculty {
+  color: #ffd700 !important;
+  font-weight: 600 !important;
 }
 
 @media (max-width: 600px) {
@@ -857,7 +883,6 @@ body {
 .nav-admin {
   color: #ffd700 !important;
   font-weight: 700 !important;
-  margin-left: 16px;
 }
 
 /* ===== Mobile Responsive ===== */
@@ -865,11 +890,11 @@ body {
   .container { margin: 16px auto; padding: 0 10px; }
 
   /* Navbar */
-  .navbar { padding: 0 14px; height: auto; min-height: 56px; flex-wrap: wrap; gap: 6px; padding-top: 8px; padding-bottom: 8px; }
-  .navbar .brand { font-size: 1rem; }
-  .navbar nav { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; }
-  .navbar nav a { margin-left: 10px; font-size: 0.82rem; }
-  .nav-user { margin-left: 10px; font-size: 0.8rem; }
+  .navbar { padding: 0 12px; height: auto; min-height: 50px; flex-wrap: wrap; gap: 4px; padding-top: 6px; padding-bottom: 6px; }
+  .navbar .brand { font-size: 0.9rem; }
+  .navbar nav { flex-wrap: wrap; gap: 3px; }
+  .navbar nav a { font-size: 0.78rem; padding: 4px 8px; }
+  .nav-user { font-size: 0.75rem; padding: 3px 8px; }
   .nav-badge { display: none; }
 
   /* Home */
@@ -926,7 +951,7 @@ body {
 .role-dot.role-faculty { background: #d68910; }
 .role-dot.role-admin   { background: #c0392b; }
 
-.nav-faculty { color: #ffd700 !important; font-weight: 600 !important; margin-left: 16px; }
+.nav-faculty { color: #ffd700 !important; font-weight: 600 !important; }
 
 /* ===== Faculty Dashboard ===== */
 .faculty-page { padding: 1.5rem; }
