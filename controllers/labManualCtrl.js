@@ -41,7 +41,7 @@ angular.module('learningPortalApp')
       $scope.submitError = 'Please add notes or a file link.'; return;
     }
     $scope.submitting = true;
-    FirebaseService.submitLabManual(subjectId, user.regNo, $scope.submission).then(function() {
+    FirebaseService.submitLabManual(subjectId, user.regNo, $scope.submission, user.name).then(function() {
       $scope.submitting = false;
       $scope.submitSuccess = 'Lab manual submitted successfully!';
       $scope.existing = { submittedAt: new Date().toISOString(), notes: $scope.submission.notes };

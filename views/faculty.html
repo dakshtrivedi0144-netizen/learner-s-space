@@ -1,49 +1,55 @@
 <div class="faculty-page">
+
   <div class="faculty-header">
     <div>
       <h2>👩‍🏫 Faculty Dashboard</h2>
-      <p>Manage syllabus, practicals and lab manual submissions</p>
+      <p>Manage practicals, theory, lab manual submissions and notifications</p>
+    </div>
+    <div ng-if="unreadCount > 0" class="faculty-notif-badge" ng-click="tab='notifications'">
+      🔔 {{ unreadCount }} new submission{{ unreadCount > 1 ? 's' : '' }}
     </div>
   </div>
 
   <!-- Subject Selector -->
   <div class="faculty-section">
     <label class="section-label">Select Subject</label>
-
     <div class="admin-loading" ng-if="loadingSubjects"><div class="spinner"></div></div>
-
-    <div ng-if="!loadingSubjects && subjects.length === 0" class="no-subjects-msg">
+    <div ng-if="!loadingSubjects && subjects.length===0" class="no-subjects-msg">
       <span>📭</span>
-      <p>No subjects assigned yet. Please contact the Admin to get subjects assigned to you.</p>
+      <p>No subjects assigned yet. Contact Admin to get subjects assigned.</p>
     </div>
-
-    <div class="subject-pills" ng-if="!loadingSubjects && subjects.length > 0">
-      <button class="pill" ng-repeat="s in subjects" ng-class="{active: selected.id === s.id}" ng-click="selectSubject(s)">
+    <div class="subject-pills" ng-if="!loadingSubjects && subjects.length>0">
+      <button class="pill" ng-repeat="s in subjects"
+              ng-class="{active: selected.id===s.id}"
+              ng-click="selectSubject(s)">
         {{ s.icon }} {{ s.name }}
       </button>
     </div>
   </div>
 
+  <!-- Tabs (only when subject selected) -->
   <div ng-if="selected.id">
-
-    <!-- Tabs -->
     <div class="faculty-tabs">
-      <button class="ftab" ng-class="{active: tab==='practicals'}" ng-click="tab='practicals'">🔬 Practicals</button>
-      <button class="ftab" ng-class="{active: tab==='upload'}" ng-click="tab='upload'">📤 Lab Manual Upload</button>
+      <button class="ftab" ng-class="{active: tab==='practicals'}"  ng-click="tab='practicals'">🔬 Practicals</button>
+      <button class="ftab" ng-class="{active: tab==='theory'}"      ng-click="tab='theory'">📖 Theory</button>
+      <button class="ftab" ng-class="{active: tab==='upload'}"      ng-click="tab='upload'">📤 Upload Permission</button>
       <button class="ftab" ng-class="{active: tab==='submissions'}" ng-click="tab='submissions'">📋 Submissions</button>
+      <button class="ftab notif-tab" ng-class="{active: tab==='notifications'}" ng-click="tab='notifications'">
+        🔔 Notifications <span class="notif-badge" ng-if="unreadCount>0">{{ unreadCount }}</span>
+      </button>
     </div>
 
-    <!-- PRACTICALS TAB -->
+    <!-- ── PRACTICALS ── -->
     <div ng-if="tab==='practicals'" class="faculty-panel">
       <div class="panel-toolbar">
-        <h3>Practicals for {{ selected.name }}</h3>
+        <h3>Practicals — {{ selected.name }}</h3>
         <button class="btn-add" ng-click="addPractical()">+ Add Practical</button>
       </div>
       <div class="save-alert success" ng-if="saveMsg">✅ {{ saveMsg }}</div>
-
+      <div ng-if="editPracticals.length===0" class="no-data-sm">No practicals yet. Click "+ Add Practical" to start.</div>
       <div class="practical-edit-list">
         <div class="practical-edit-item" ng-repeat="p in editPracticals track by $index">
-          <div class="pei-num">{{ $index + 1 }}</div>
+          <div class="pei-num">{{ $index+1 }}</div>
           <div class="pei-fields">
             <input type="text" ng-model="p.title" placeholder="Practical title" class="pei-input" />
             <textarea ng-model="p.aim" placeholder="Aim / Objective" class="pei-textarea" rows="2"></textarea>
@@ -52,7 +58,6 @@
           <button class="btn-del" ng-click="removePractical($index)" title="Delete">🗑️</button>
         </div>
       </div>
-
       <div class="panel-actions">
         <button class="btn-save" ng-click="savePracticals()" ng-disabled="saving">
           {{ saving ? 'Saving...' : '💾 Save All Practicals' }}
@@ -60,17 +65,38 @@
       </div>
     </div>
 
-    <!-- UPLOAD PERMISSION TAB -->
+    <!-- ── THEORY ── -->
+    <div ng-if="tab==='theory'" class="faculty-panel">
+      <h3>Theory Units — {{ selected.name }}</h3>
+      <p class="panel-desc">Syllabus units and topics for this subject (read-only view).</p>
+      <div ng-if="theoryUnits.length===0" class="no-data-sm">No theory units available for this subject yet.</div>
+      <div class="theory-unit-list">
+        <div class="theory-unit-card" ng-repeat="u in theoryUnits track by $index">
+          <div class="tuc-header">
+            <span class="tuc-num">Unit {{ u.id || ($index+1) }}</span>
+            <span class="tuc-title">{{ u.title }}</span>
+            <span class="hours-badge" ng-if="u.hours">{{ u.hours }}h</span>
+          </div>
+          <ul class="tuc-topics" ng-if="u.topics && u.topics.length">
+            <li ng-repeat="t in u.topics">
+              <strong>{{ t.name }}</strong>
+              <span ng-if="t.material" class="tuc-material"> — {{ t.material | limitTo:80 }}{{ t.material.length>80 ? '...' : '' }}</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── UPLOAD PERMISSION ── -->
     <div ng-if="tab==='upload'" class="faculty-panel">
       <h3>Lab Manual Upload Permission</h3>
-      <p class="panel-desc">Toggle this to allow or block students from uploading their lab manual for <strong>{{ selected.name }}</strong>.</p>
-
+      <p class="panel-desc">Toggle to allow/block students from submitting lab manual for <strong>{{ selected.name }}</strong>.</p>
       <div class="upload-toggle-card">
         <div class="toggle-info">
           <span class="toggle-status" ng-class="uploadAllowed ? 'status-open' : 'status-closed'">
             {{ uploadAllowed ? '🟢 Upload OPEN' : '🔴 Upload CLOSED' }}
           </span>
-          <p>{{ uploadAllowed ? 'Students can currently upload their lab manual.' : 'Students cannot upload yet.' }}</p>
+          <p>{{ uploadAllowed ? 'Students can currently upload.' : 'Students cannot upload yet.' }}</p>
         </div>
         <label class="switch">
           <input type="checkbox" ng-model="uploadAllowed" ng-change="toggleUpload()" />
@@ -79,31 +105,49 @@
       </div>
     </div>
 
-    <!-- SUBMISSIONS TAB -->
+    <!-- ── SUBMISSIONS ── -->
     <div ng-if="tab==='submissions'" class="faculty-panel">
       <h3>Lab Manual Submissions — {{ selected.name }}</h3>
       <div class="admin-loading" ng-if="loadingSubmissions"><div class="spinner"></div></div>
       <div class="admin-table-wrap" ng-if="!loadingSubmissions">
         <table class="admin-table">
-          <thead>
-            <tr><th>#</th><th>Reg No</th><th>File / Notes</th><th>Submitted At</th></tr>
-          </thead>
+          <thead><tr><th>#</th><th>Student</th><th>Reg No</th><th>File / Notes</th><th>Submitted At</th></tr></thead>
           <tbody>
-            <tr ng-repeat="s in submissions track by s.regNo">
-              <td>{{ $index + 1 }}</td>
+            <tr ng-repeat="s in submissions track by s.regNo" ng-class="{'row-even':$even}">
+              <td>{{ $index+1 }}</td>
+              <td><span class="user-avatar">{{ (s.studentName||s.regNo)[0] }}</span> {{ s.studentName || s.regNo }}</td>
               <td><code>{{ s.regNo }}</code></td>
               <td>
-                <span ng-if="s.fileUrl"><a href="{{ s.fileUrl }}" target="_blank">📎 {{ s.fileName }}</a></span>
-                <span ng-if="!s.fileUrl && s.notes">{{ s.notes }}</span>
+                <a ng-if="s.fileUrl" href="{{ s.fileUrl }}" target="_blank" class="file-link">📎 {{ s.fileName || 'View File' }}</a>
+                <span ng-if="!s.fileUrl && s.notes">{{ s.notes | limitTo:60 }}{{ s.notes.length>60 ? '...' : '' }}</span>
                 <span ng-if="!s.fileUrl && !s.notes" class="td-small">—</span>
               </td>
               <td class="td-small">{{ s.submittedAt | date:'dd MMM yyyy, hh:mm a' }}</td>
             </tr>
-            <tr ng-if="submissions.length === 0">
-              <td colspan="4" class="no-data">No submissions yet.</td>
-            </tr>
+            <tr ng-if="submissions.length===0"><td colspan="5" class="no-data">No submissions yet.</td></tr>
           </tbody>
         </table>
+      </div>
+    </div>
+
+    <!-- ── NOTIFICATIONS ── -->
+    <div ng-if="tab==='notifications'" class="faculty-panel">
+      <div class="notif-toolbar">
+        <h3>🔔 Lab Manual Submission Alerts</h3>
+        <button class="btn-role-save" ng-if="unreadCount>0" ng-click="markAllRead()">Mark All Read</button>
+      </div>
+      <div ng-if="notifications.length===0" class="no-data-sm">No notifications yet.</div>
+      <div class="notif-list">
+        <div class="notif-item" ng-repeat="n in notifications track by n.id"
+             ng-class="{unread: isUnread(n)}"
+             ng-click="markRead(n)">
+          <div class="notif-icon">📄</div>
+          <div class="notif-body">
+            <div class="notif-msg">{{ n.message }}</div>
+            <div class="notif-time">{{ n.createdAt | date:'dd MMM yyyy, hh:mm a' }}</div>
+          </div>
+          <div class="notif-dot" ng-if="isUnread(n)"></div>
+        </div>
       </div>
     </div>
 

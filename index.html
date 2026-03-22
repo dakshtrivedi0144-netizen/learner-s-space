@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <title>Learner's Space — Unified Learning Portal</title>
-  <link rel="stylesheet" href="css/style.css?v=6" />
+  <link rel="stylesheet" href="css/style.css?v=7" />
 </head>
 <body>
 
@@ -15,8 +15,7 @@
     <nav>
       <a href="#!/home" ng-if="getCurrentUser()">Home</a>
       <a href="#!/faculty" ng-if="getCurrentUser() && (getCurrentUser().role === 'faculty' || getCurrentUser().role === 'admin')" class="nav-faculty">👩‍🏫 Faculty</a>
-      <a href="#!/admin" ng-if="getCurrentUser() && getCurrentUser().role === 'admin'" class="nav-admin">🛡️ Admin</a>
-      <span class="nav-user" ng-if="getCurrentUser()">
+      <a href="#!/admin" ng-if="getCurrentUser() && getCurrentUser().role === 'admin'" class="nav-admin">🛡️ Admin</a>      <span class="nav-user" ng-if="getCurrentUser()">
         <span class="role-dot role-{{ getCurrentUser().role || 'student' }}"></span>
         {{ getCurrentUser().name }}
         <span class="nav-badge">Sem {{ getCurrentUser().semester }}</span>
@@ -35,17 +34,17 @@
   <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.3/angular-route.min.js"></script>
 
   <!-- App Module & Config -->
-  <script src="app.js?v=4"></script>
+  <script src="app.js?v=5"></script>
 
   <!-- Services -->
-  <script src="services/localStorageService.js?v=2"></script>
+  <script src="services/localStorageService.js?v=3"></script>
   <script src="services/dataService.js?v=2"></script>
 
   <!-- Controllers -->
-  <script src="controllers/adminCtrl.js?v=3"></script>
+  <script src="controllers/adminCtrl.js?v=4"></script>
   <script src="controllers/authCtrl.js?v=2"></script>
-  <script src="controllers/facultyCtrl.js?v=3"></script>
-  <script src="controllers/labManualCtrl.js?v=1"></script>
+  <script src="controllers/facultyCtrl.js?v=4"></script>
+  <script src="controllers/labManualCtrl.js?v=2"></script>
   <script src="controllers/homeCtrl.js?v=1"></script>
   <script src="controllers/dashboardCtrl.js?v=3"></script>
   <script src="controllers/submissionCtrl.js?v=3"></script>
