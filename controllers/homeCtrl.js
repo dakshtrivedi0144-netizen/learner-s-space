@@ -1,5 +1,10 @@
 angular.module('learningPortalApp')
-.controller('HomeCtrl', ['$scope', function($scope) {
+.controller('HomeCtrl', ['$scope', '$location', function($scope, $location) {
+  var user = JSON.parse(localStorage.getItem('ulp_session') || 'null');
+  if (!user) { $location.path('/login'); return; }
+  if (user.role === 'admin') { $location.path('/admin'); return; }
+  if (user.role === 'faculty') { $location.path('/faculty'); return; }
+
   $scope.semesters = [
     { id: 3, label: 'Semester III', desc: 'Data Structures, OOP, Digital Electronics...' },
     { id: 4, label: 'Semester IV', desc: 'DBMS, Computer Networks, OS...' },
@@ -10,7 +15,12 @@ angular.module('learningPortalApp')
   ];
 }])
 
-.controller('SemesterCtrl', ['$scope', '$routeParams', function($scope, $routeParams) {
+.controller('SemesterCtrl', ['$scope', '$routeParams', '$location', function($scope, $routeParams, $location) {
+  var user = JSON.parse(localStorage.getItem('ulp_session') || 'null');
+  if (!user) { $location.path('/login'); return; }
+  if (user.role === 'admin') { $location.path('/admin'); return; }
+  if (user.role === 'faculty') { $location.path('/faculty'); return; }
+
   var semId = parseInt($routeParams.semId);
   $scope.semId = semId;
 

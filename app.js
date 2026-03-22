@@ -197,6 +197,18 @@ angular.module('learningPortalApp', ['ngRoute'])
   $rootScope.$on('$routeChangeStart', function(event, next) {
     var isLogin = next.originalPath === '/login';
     var session = localStorage.getItem(SESSION_KEY);
+
+    // If already logged in and trying to access login page, redirect to dashboard
+    if (isLogin && session) {
+      var loggedIn = JSON.parse(session);
+      if (loggedIn) {
+        if (loggedIn.role === 'admin') { $location.path('/admin'); }
+        else if (loggedIn.role === 'faculty') { $location.path('/faculty'); }
+        else { $location.path('/home'); }
+        return;
+      }
+    }
+
     if (!isLogin && !session) {
       $location.path('/login');
     }
@@ -209,6 +221,14 @@ angular.module('learningPortalApp', ['ngRoute'])
     if (next.originalPath === '/faculty') {
       var u2 = JSON.parse(session || 'null');
       if (!u2 || (u2.role !== 'faculty' && u2.role !== 'admin')) { $location.path('/home'); }
+    }
+    // Block non-students from student content pages
+    var studentOnlyRoutes = ['/overview', '/practicals', '/cc-overview', '/cc-practicals', '/dm-overview', '/dm-practicals', '/references', '/home', '/semester/:semId', '/lab-manual/:subjectId'];
+    var isStudentRoute = studentOnlyRoutes.some(function(r) { return next.originalPath === r; });
+    if (isStudentRoute && session) {
+      var u3 = JSON.parse(session);
+      if (u3 && u3.role === 'admin') { $location.path('/admin'); }
+      else if (u3 && u3.role === 'faculty') { $location.path('/faculty'); }
     }
   });
 

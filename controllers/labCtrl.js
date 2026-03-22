@@ -1,5 +1,10 @@
 angular.module('learningPortalApp')
-.controller('LabCtrl', ['$scope', 'FirebaseService', function($scope, FirebaseService) {
+.controller('LabCtrl', ['$scope', '$location', 'FirebaseService', function($scope, $location, FirebaseService) {
+
+  var user = JSON.parse(localStorage.getItem('ulp_session') || 'null');
+  if (!user) { $location.path('/login'); return; }
+  if (user.role === 'admin') { $location.path('/admin'); return; }
+  if (user.role === 'faculty') { $location.path('/faculty'); return; }
 
   var SUBJECT_ID   = 'angularjs';
   var PROGRESS_KEY = 'ulp_progress_' + SUBJECT_ID;

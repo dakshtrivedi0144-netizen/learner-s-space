@@ -1,5 +1,10 @@
 angular.module('learningPortalApp')
-.controller('DashboardCtrl', ['$scope', function($scope) {
+.controller('DashboardCtrl', ['$scope', '$location', function($scope, $location) {
+  var user = JSON.parse(localStorage.getItem('ulp_session') || 'null');
+  if (!user) { $location.path('/login'); return; }
+  if (user.role === 'admin') { $location.path('/admin'); return; }
+  if (user.role === 'faculty') { $location.path('/faculty'); return; }
+
   $scope.studentInfo = { course: 'BTech Computer Engineering', subject: 'AngularJS (Unit I-V)' };
   $scope.searchTerm = '';
   $scope.sortField = 'hours';

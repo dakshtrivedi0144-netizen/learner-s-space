@@ -1,5 +1,10 @@
 angular.module('learningPortalApp')
-.controller('CCLabCtrl', ['$scope', 'FirebaseService', function($scope, FirebaseService) {
+.controller('CCLabCtrl', ['$scope', '$location', 'FirebaseService', function($scope, $location, FirebaseService) {
+
+  var user = JSON.parse(localStorage.getItem('ulp_session') || 'null');
+  if (!user) { $location.path('/login'); return; }
+  if (user.role === 'admin') { $location.path('/admin'); return; }
+  if (user.role === 'faculty') { $location.path('/faculty'); return; }
 
   var SUBJECT_ID   = 'cloud-computing';
   var PROGRESS_KEY = 'ulp_progress_' + SUBJECT_ID;

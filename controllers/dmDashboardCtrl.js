@@ -1,5 +1,10 @@
 angular.module('learningPortalApp')
-.controller('DMDashboardCtrl', ['$scope', function($scope) {
+.controller('DMDashboardCtrl', ['$scope', '$location', function($scope, $location) {
+  var user = JSON.parse(localStorage.getItem('ulp_session') || 'null');
+  if (!user) { $location.path('/login'); return; }
+  if (user.role === 'admin') { $location.path('/admin'); return; }
+  if (user.role === 'faculty') { $location.path('/faculty'); return; }
+
   $scope.studentInfo = { course: 'BTech Computer Engineering', subject: 'Data Mining & Data Warehousing (23UGCE602)' };
   $scope.searchTerm = '';
   $scope.sortField = 'hours';
