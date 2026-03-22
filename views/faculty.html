@@ -1,0 +1,103 @@
+<div class="faculty-page">
+  <div class="faculty-header">
+    <div>
+      <h2>👩‍🏫 Faculty Dashboard</h2>
+      <p>Manage syllabus, practicals and lab manual submissions</p>
+    </div>
+  </div>
+
+  <!-- Subject Selector -->
+  <div class="faculty-section">
+    <label class="section-label">Select Subject</label>
+    <div class="subject-pills">
+      <button class="pill" ng-repeat="s in subjects" ng-class="{active: selected.subject === s.id}" ng-click="selectSubject(s)">
+        {{ s.icon }} {{ s.name }}
+      </button>
+    </div>
+  </div>
+
+  <div ng-if="selected.subject">
+
+    <!-- Tabs -->
+    <div class="faculty-tabs">
+      <button class="ftab" ng-class="{active: tab==='practicals'}" ng-click="tab='practicals'">🔬 Practicals</button>
+      <button class="ftab" ng-class="{active: tab==='upload'}" ng-click="tab='upload'">📤 Lab Manual Upload</button>
+      <button class="ftab" ng-class="{active: tab==='submissions'}" ng-click="tab='submissions'">📋 Submissions</button>
+    </div>
+
+    <!-- PRACTICALS TAB -->
+    <div ng-if="tab==='practicals'" class="faculty-panel">
+      <div class="panel-toolbar">
+        <h3>Practicals for {{ selected.name }}</h3>
+        <button class="btn-add" ng-click="addPractical()">+ Add Practical</button>
+      </div>
+      <div class="save-alert success" ng-if="saveMsg">✅ {{ saveMsg }}</div>
+
+      <div class="practical-edit-list">
+        <div class="practical-edit-item" ng-repeat="p in editPracticals track by $index">
+          <div class="pei-num">{{ $index + 1 }}</div>
+          <div class="pei-fields">
+            <input type="text" ng-model="p.title" placeholder="Practical title" class="pei-input" />
+            <textarea ng-model="p.aim" placeholder="Aim / Objective" class="pei-textarea" rows="2"></textarea>
+            <textarea ng-model="p.code" placeholder="Code / Steps" class="pei-textarea code-font" rows="4"></textarea>
+          </div>
+          <button class="btn-del" ng-click="removePractical($index)" title="Delete">🗑️</button>
+        </div>
+      </div>
+
+      <div class="panel-actions">
+        <button class="btn-save" ng-click="savePracticals()" ng-disabled="saving">
+          {{ saving ? 'Saving...' : '💾 Save All Practicals' }}
+        </button>
+      </div>
+    </div>
+
+    <!-- UPLOAD PERMISSION TAB -->
+    <div ng-if="tab==='upload'" class="faculty-panel">
+      <h3>Lab Manual Upload Permission</h3>
+      <p class="panel-desc">Toggle this to allow or block students from uploading their lab manual for <strong>{{ selected.name }}</strong>.</p>
+
+      <div class="upload-toggle-card">
+        <div class="toggle-info">
+          <span class="toggle-status" ng-class="uploadAllowed ? 'status-open' : 'status-closed'">
+            {{ uploadAllowed ? '🟢 Upload OPEN' : '🔴 Upload CLOSED' }}
+          </span>
+          <p>{{ uploadAllowed ? 'Students can currently upload their lab manual.' : 'Students cannot upload yet.' }}</p>
+        </div>
+        <label class="switch">
+          <input type="checkbox" ng-model="uploadAllowed" ng-change="toggleUpload()" />
+          <span class="slider"></span>
+        </label>
+      </div>
+    </div>
+
+    <!-- SUBMISSIONS TAB -->
+    <div ng-if="tab==='submissions'" class="faculty-panel">
+      <h3>Lab Manual Submissions — {{ selected.name }}</h3>
+      <div class="admin-loading" ng-if="loadingSubmissions"><div class="spinner"></div></div>
+      <div class="admin-table-wrap" ng-if="!loadingSubmissions">
+        <table class="admin-table">
+          <thead>
+            <tr><th>#</th><th>Reg No</th><th>File / Notes</th><th>Submitted At</th></tr>
+          </thead>
+          <tbody>
+            <tr ng-repeat="s in submissions track by s.regNo">
+              <td>{{ $index + 1 }}</td>
+              <td><code>{{ s.regNo }}</code></td>
+              <td>
+                <span ng-if="s.fileUrl"><a href="{{ s.fileUrl }}" target="_blank">📎 {{ s.fileName }}</a></span>
+                <span ng-if="!s.fileUrl && s.notes">{{ s.notes }}</span>
+                <span ng-if="!s.fileUrl && !s.notes" class="td-small">—</span>
+              </td>
+              <td class="td-small">{{ s.submittedAt | date:'dd MMM yyyy, hh:mm a' }}</td>
+            </tr>
+            <tr ng-if="submissions.length === 0">
+              <td colspan="4" class="no-data">No submissions yet.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>

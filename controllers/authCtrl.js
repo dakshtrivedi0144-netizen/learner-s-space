@@ -36,7 +36,7 @@ angular.module('learningPortalApp')
   $scope.register = function() {
     $scope.error = ''; $scope.success = '';
     var r = $scope.reg;
-    if (!r.name || !r.regNo || !r.faculty || !r.branch || !r.semester || !r.password || !r.confirmPassword) {
+    if (!r.name || !r.regNo || !r.faculty || !r.branch || !r.semester || !r.role || !r.password || !r.confirmPassword) {
       $scope.error = 'Please fill in all required fields.'; return;
     }
     if (r.password !== r.confirmPassword) {

@@ -1,0 +1,51 @@
+<div class="labmanual-page">
+  <div class="lm-header">
+    <a ng-click="goBack()" class="back-btn">← Back</a>
+    <h2>📤 Lab Manual Submission</h2>
+    <p>{{ subjectName }}</p>
+  </div>
+
+  <div class="lm-status-card" ng-class="uploadAllowed ? 'lm-open' : 'lm-closed'">
+    <span class="lm-status-icon">{{ uploadAllowed ? '🟢' : '🔴' }}</span>
+    <div>
+      <strong>{{ uploadAllowed ? 'Submission Open' : 'Submission Closed' }}</strong>
+      <p>{{ uploadAllowed ? 'Your faculty has allowed lab manual submission.' : 'Lab manual submission is not open yet. Please wait for your faculty to enable it.' }}</p>
+    </div>
+  </div>
+
+  <div ng-if="uploadAllowed">
+    <div class="lm-existing" ng-if="existing">
+      <div class="lm-submitted-badge">✅ Already Submitted</div>
+      <p>You submitted on <strong>{{ existing.submittedAt | date:'dd MMM yyyy, hh:mm a' }}</strong></p>
+      <p ng-if="existing.notes"><strong>Notes:</strong> {{ existing.notes }}</p>
+      <p class="lm-resubmit">You can resubmit to update your submission.</p>
+    </div>
+
+    <div class="lm-form card">
+      <h3>{{ existing ? 'Update Submission' : 'Submit Lab Manual' }}</h3>
+
+      <div class="form-group">
+        <label>Lab Manual Notes / Description</label>
+        <textarea ng-model="submission.notes" rows="4" placeholder="Describe your lab manual, experiments covered, observations..." class="lm-textarea"></textarea>
+      </div>
+
+      <div class="form-group">
+        <label>Google Drive / OneDrive Link (optional)</label>
+        <input type="url" ng-model="submission.fileUrl" placeholder="https://drive.google.com/..." />
+        <span class="hint">Paste a shareable link to your lab manual PDF/file</span>
+      </div>
+
+      <div class="form-group">
+        <label>File Name (optional)</label>
+        <input type="text" ng-model="submission.fileName" placeholder="e.g. LabManual_23CE001_Sem6.pdf" />
+      </div>
+
+      <div class="save-alert error" ng-if="submitError">⚠️ {{ submitError }}</div>
+      <div class="save-alert success" ng-if="submitSuccess">✅ {{ submitSuccess }}</div>
+
+      <button class="btn-auth" ng-click="submitManual()" ng-disabled="submitting">
+        {{ submitting ? 'Submitting...' : (existing ? '🔄 Update Submission' : '📤 Submit Lab Manual') }}
+      </button>
+    </div>
+  </div>
+</div>

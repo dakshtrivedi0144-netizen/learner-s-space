@@ -2,64 +2,82 @@
   <div class="admin-header">
     <div>
       <h2>🛡️ Admin Panel</h2>
-      <p>Manage all registered users</p>
+      <p>Manage users, roles and platform settings</p>
     </div>
     <div class="admin-stats">
-      <div class="stat-box">
-        <span class="stat-num">{{ users.length }}</span>
-        <span class="stat-label">Total Users</span>
-      </div>
-      <div class="stat-box">
-        <span class="stat-num">{{ semCount() }}</span>
-        <span class="stat-label">Semesters Active</span>
-      </div>
+      <div class="stat-box"><span class="stat-num">{{ users.length }}</span><span class="stat-label">Total Users</span></div>
+      <div class="stat-box"><span class="stat-num">{{ roleCount('student') }}</span><span class="stat-label">Students</span></div>
+      <div class="stat-box"><span class="stat-num">{{ roleCount('faculty') }}</span><span class="stat-label">Faculty</span></div>
     </div>
   </div>
 
+  <div class="admin-tabs">
+    <button class="ftab" ng-class="{active: tab==='users'}" ng-click="tab='users'">👥 Users</button>
+    <button class="ftab" ng-class="{active: tab==='roles'}" ng-click="tab='roles'">🔑 Role Management</button>
+  </div>
+
   <div class="admin-toolbar">
-    <input type="text" class="admin-search" placeholder="🔍 Search by name, reg no, branch..." ng-model="searchTerm" />
+    <input type="text" class="admin-search" placeholder="🔍 Search name, reg no, branch..." ng-model="searchTerm" />
     <select class="admin-filter" ng-model="filterSem">
       <option value="">All Semesters</option>
       <option ng-repeat="s in [3,4,5,6,7,8]" value="{{ s }}">Sem {{ s }}</option>
     </select>
-    <select class="admin-filter" ng-model="filterBranch">
-      <option value="">All Branches</option>
-      <option ng-repeat="b in branches" value="{{ b }}">{{ b }}</option>
+    <select class="admin-filter" ng-model="filterRole">
+      <option value="">All Roles</option>
+      <option value="student">Student</option>
+      <option value="faculty">Faculty</option>
+      <option value="admin">Admin</option>
     </select>
   </div>
 
-  <div class="admin-loading" ng-if="loading">
-    <div class="spinner"></div>
-    <p>Loading users...</p>
-  </div>
-
+  <div class="admin-loading" ng-if="loading"><div class="spinner"></div><p>Loading users...</p></div>
   <div class="admin-error" ng-if="error">⚠️ {{ error }}</div>
+  <div class="save-alert success" ng-if="actionMsg">✅ {{ actionMsg }}</div>
 
-  <div class="admin-table-wrap" ng-if="!loading">
+  <!-- USERS TABLE -->
+  <div class="admin-table-wrap" ng-if="!loading && tab==='users'">
     <table class="admin-table">
       <thead>
-        <tr>
-          <th>#</th>
-          <th>Name</th>
-          <th>Reg No</th>
-          <th>Faculty</th>
-          <th>Branch</th>
-          <th>Semester</th>
-          <th>Joined</th>
-        </tr>
+        <tr><th>#</th><th>Name</th><th>Reg No</th><th>Branch</th><th>Sem</th><th>Role</th><th>Joined</th></tr>
       </thead>
       <tbody>
         <tr ng-repeat="u in filteredUsers() track by u.regNo" ng-class="{'row-even': $even}">
           <td>{{ $index + 1 }}</td>
           <td><span class="user-avatar">{{ u.name[0] }}</span> {{ u.name }}</td>
           <td><code>{{ u.regNo }}</code></td>
-          <td class="td-small">{{ u.faculty }}</td>
           <td><span class="branch-tag">{{ u.branch }}</span></td>
           <td><span class="sem-tag">Sem {{ u.semester }}</span></td>
-          <td class="td-small">{{ u.createdAt | date:'dd MMM yyyy' }}</td>
+          <td><span class="role-tag role-{{ u.role || 'student' }}">{{ u.role || 'student' }}</span></td>
+          <td class="td-small">{{ u.createdAt | date:'dd MMM yy' }}</td>
         </tr>
-        <tr ng-if="filteredUsers().length === 0">
-          <td colspan="7" class="no-data">No users found.</td>
+        <tr ng-if="filteredUsers().length === 0"><td colspan="7" class="no-data">No users found.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ROLE MANAGEMENT -->
+  <div class="admin-table-wrap" ng-if="!loading && tab==='roles'">
+    <table class="admin-table">
+      <thead>
+        <tr><th>#</th><th>Name</th><th>Reg No</th><th>Current Role</th><th>Change Role</th><th>Action</th></tr>
+      </thead>
+      <tbody>
+        <tr ng-repeat="u in filteredUsers() track by u.regNo" ng-class="{'row-even': $even}">
+          <td>{{ $index + 1 }}</td>
+          <td><span class="user-avatar">{{ u.name[0] }}</span> {{ u.name }}</td>
+          <td><code>{{ u.regNo }}</code></td>
+          <td><span class="role-tag role-{{ u.role || 'student' }}">{{ u.role || 'student' }}</span></td>
+          <td>
+            <select ng-model="u.newRole" class="role-select">
+              <option value="student">Student</option>
+              <option value="faculty">Faculty</option>
+              <option value="admin">Admin</option>
+            </select>
+          </td>
+          <td>
+            <button class="btn-role-save" ng-click="updateRole(u)">Update</button>
+            <button class="btn-role-del" ng-click="deleteUser(u)">Delete</button>
+          </td>
         </tr>
       </tbody>
     </table>

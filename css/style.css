@@ -914,3 +914,120 @@ body {
   .auth-page { padding: 16px 10px; }
   .admin-table th, .admin-table td { padding: 8px 10px; font-size: 0.8rem; }
 }
+
+/* ===== Role Tags ===== */
+.role-tag { padding: 3px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; }
+.role-student { background: #eaf4fb; color: #2980b9; }
+.role-faculty { background: #fef9e7; color: #d68910; }
+.role-admin   { background: #fdecea; color: #c0392b; }
+
+.role-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; }
+.role-dot.role-student { background: #2980b9; }
+.role-dot.role-faculty { background: #d68910; }
+.role-dot.role-admin   { background: #c0392b; }
+
+.nav-faculty { color: #ffd700 !important; font-weight: 600 !important; margin-left: 16px; }
+
+/* ===== Faculty Dashboard ===== */
+.faculty-page { padding: 1.5rem; }
+.faculty-header { margin-bottom: 1.5rem; }
+.faculty-header h2 { font-size: 1.6rem; color: #2c3e50; }
+.faculty-header p { color: #7f8c8d; font-size: 0.9rem; }
+
+.faculty-section { margin-bottom: 1.5rem; }
+.section-label { font-size: 0.82rem; font-weight: 700; color: #555; text-transform: uppercase; letter-spacing: 0.5px; display: block; margin-bottom: 0.6rem; }
+
+.subject-pills { display: flex; flex-wrap: wrap; gap: 0.6rem; }
+.pill { padding: 8px 18px; border: 2px solid #ddd; background: #fff; border-radius: 24px; font-size: 0.88rem; cursor: pointer; transition: all 0.2s; color: #555; }
+.pill:hover { border-color: #c0392b; color: #c0392b; }
+.pill.active { background: #c0392b; border-color: #c0392b; color: #fff; font-weight: 600; }
+
+.faculty-tabs, .admin-tabs { display: flex; gap: 0.4rem; margin-bottom: 1.2rem; flex-wrap: wrap; }
+.ftab { padding: 9px 20px; border: 1.5px solid #ddd; background: #fff; border-radius: 8px; font-size: 0.88rem; cursor: pointer; transition: all 0.2s; color: #555; }
+.ftab:hover { border-color: #c0392b; color: #c0392b; }
+.ftab.active { background: #c0392b; border-color: #c0392b; color: #fff; font-weight: 600; }
+
+.faculty-panel { background: #fff; border-radius: 12px; padding: 1.5rem; box-shadow: 0 2px 12px rgba(0,0,0,0.08); }
+.faculty-panel h3 { font-size: 1.1rem; color: #2c3e50; margin-bottom: 0.4rem; }
+.panel-desc { color: #7f8c8d; font-size: 0.88rem; margin-bottom: 1.2rem; }
+
+.panel-toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem; }
+
+.btn-add { background: #27ae60; color: #fff; border: none; padding: 8px 18px; border-radius: 8px; font-size: 0.88rem; cursor: pointer; font-weight: 600; }
+.btn-add:hover { background: #1e8449; }
+
+.btn-save { background: #c0392b; color: #fff; border: none; padding: 10px 24px; border-radius: 8px; font-size: 0.9rem; cursor: pointer; font-weight: 600; }
+.btn-save:hover { background: #a93226; }
+.btn-save:disabled { background: #ccc; cursor: not-allowed; }
+
+.panel-actions { margin-top: 1.2rem; display: flex; justify-content: flex-end; }
+
+.save-alert { padding: 10px 16px; border-radius: 8px; margin-bottom: 1rem; font-size: 0.88rem; font-weight: 500; }
+.save-alert.success { background: #eafaf1; color: #1e8449; border-left: 4px solid #1e8449; }
+.save-alert.error   { background: #fdecea; color: #c0392b; border-left: 4px solid #c0392b; }
+
+.practical-edit-list { display: flex; flex-direction: column; gap: 0.8rem; max-height: 500px; overflow-y: auto; padding-right: 4px; }
+
+.practical-edit-item { display: flex; gap: 0.8rem; align-items: flex-start; background: #fafafa; border: 1px solid #eee; border-radius: 8px; padding: 0.8rem; }
+.pei-num { min-width: 28px; height: 28px; background: #c0392b; color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: 700; margin-top: 4px; }
+.pei-fields { flex: 1; display: flex; flex-direction: column; gap: 0.5rem; }
+.pei-input { padding: 8px 12px; border: 1.5px solid #ddd; border-radius: 6px; font-size: 0.9rem; }
+.pei-textarea { padding: 8px 12px; border: 1.5px solid #ddd; border-radius: 6px; font-size: 0.85rem; resize: vertical; font-family: inherit; }
+.pei-textarea.code-font { font-family: 'Consolas', monospace; font-size: 0.8rem; }
+.pei-input:focus, .pei-textarea:focus { outline: none; border-color: #c0392b; }
+.btn-del { background: none; border: none; font-size: 1.2rem; cursor: pointer; padding: 4px; opacity: 0.6; }
+.btn-del:hover { opacity: 1; }
+
+/* Toggle Switch */
+.upload-toggle-card { display: flex; justify-content: space-between; align-items: center; background: #fafafa; border: 1.5px solid #eee; border-radius: 12px; padding: 1.2rem 1.5rem; margin-top: 1rem; }
+.toggle-status { font-size: 1rem; font-weight: 700; display: block; margin-bottom: 0.3rem; }
+.status-open  { color: #27ae60; }
+.status-closed { color: #c0392b; }
+.toggle-info p { color: #7f8c8d; font-size: 0.85rem; }
+
+.switch { position: relative; display: inline-block; width: 56px; height: 30px; }
+.switch input { opacity: 0; width: 0; height: 0; }
+.slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background: #ccc; border-radius: 30px; transition: 0.3s; }
+.slider:before { position: absolute; content: ""; height: 22px; width: 22px; left: 4px; bottom: 4px; background: #fff; border-radius: 50%; transition: 0.3s; }
+input:checked + .slider { background: #27ae60; }
+input:checked + .slider:before { transform: translateX(26px); }
+
+/* Role management */
+.role-select { padding: 6px 10px; border: 1.5px solid #ddd; border-radius: 6px; font-size: 0.85rem; }
+.btn-role-save { background: #3498db; color: #fff; border: none; padding: 5px 12px; border-radius: 6px; font-size: 0.8rem; cursor: pointer; margin-right: 4px; }
+.btn-role-save:hover { background: #2980b9; }
+.btn-role-del { background: #e74c3c; color: #fff; border: none; padding: 5px 12px; border-radius: 6px; font-size: 0.8rem; cursor: pointer; }
+.btn-role-del:hover { background: #c0392b; }
+
+/* ===== Lab Manual Page ===== */
+.labmanual-page { padding: 1.5rem; max-width: 700px; margin: 0 auto; }
+.lm-header { margin-bottom: 1.5rem; }
+.lm-header h2 { font-size: 1.5rem; color: #2c3e50; margin-bottom: 0.2rem; }
+.lm-header p { color: #7f8c8d; }
+
+.lm-status-card { display: flex; align-items: flex-start; gap: 1rem; padding: 1.2rem 1.5rem; border-radius: 12px; margin-bottom: 1.5rem; }
+.lm-open   { background: #eafaf1; border: 1.5px solid #a9dfbf; }
+.lm-closed { background: #fdecea; border: 1.5px solid #f5b7b1; }
+.lm-status-icon { font-size: 1.8rem; }
+.lm-status-card strong { font-size: 1rem; color: #2c3e50; }
+.lm-status-card p { font-size: 0.88rem; color: #555; margin-top: 0.2rem; }
+
+.lm-existing { background: #eafaf1; border: 1.5px solid #a9dfbf; border-radius: 10px; padding: 1rem 1.2rem; margin-bottom: 1.2rem; }
+.lm-submitted-badge { font-weight: 700; color: #1e8449; margin-bottom: 0.4rem; }
+.lm-resubmit { font-size: 0.82rem; color: #7f8c8d; margin-top: 0.4rem; }
+
+.lm-form { padding: 1.5rem; }
+.lm-form h3 { margin-bottom: 1rem; color: #2c3e50; }
+.lm-textarea { width: 100%; padding: 10px 14px; border: 1.5px solid #ddd; border-radius: 8px; font-size: 0.9rem; font-family: inherit; resize: vertical; }
+.lm-textarea:focus { outline: none; border-color: #c0392b; }
+.hint { font-size: 0.78rem; color: #95a5a6; display: block; margin-top: 4px; }
+
+@media (max-width: 768px) {
+  .faculty-page, .labmanual-page, .admin-page { padding: 1rem; }
+  .subject-pills { gap: 0.4rem; }
+  .pill { padding: 6px 14px; font-size: 0.82rem; }
+  .upload-toggle-card { flex-direction: column; gap: 1rem; }
+  .panel-toolbar { flex-direction: column; align-items: flex-start; }
+  .practical-edit-item { flex-direction: column; }
+  .pei-num { align-self: flex-start; }
+}

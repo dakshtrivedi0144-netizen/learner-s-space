@@ -13,6 +13,10 @@ angular.module('learningPortalApp', ['ngRoute'])
       templateUrl: 'views/admin.html',
       controller: 'AdminCtrl'
     })
+    .when('/faculty', {
+      templateUrl: 'views/faculty.html',
+      controller: 'FacultyCtrl'
+    })
     .when('/home', {
       templateUrl: 'views/home.html',
       controller: 'HomeCtrl'
@@ -49,6 +53,10 @@ angular.module('learningPortalApp', ['ngRoute'])
       templateUrl: 'views/dm-practicals.html',
       controller: 'DMLabCtrl'
     })
+    .when('/lab-manual/:subjectId', {
+      templateUrl: 'views/lab-manual.html',
+      controller: 'LabManualCtrl'
+    })
     .otherwise({ redirectTo: '/login' });
 }])
 
@@ -61,6 +69,16 @@ angular.module('learningPortalApp', ['ngRoute'])
     var session = localStorage.getItem(SESSION_KEY);
     if (!isLogin && !session) {
       $location.path('/login');
+    }
+    // Block non-admin from /admin
+    if (next.originalPath === '/admin') {
+      var u = JSON.parse(session || 'null');
+      if (!u || u.role !== 'admin') { $location.path('/home'); }
+    }
+    // Block non-faculty/admin from /faculty
+    if (next.originalPath === '/faculty') {
+      var u2 = JSON.parse(session || 'null');
+      if (!u2 || (u2.role !== 'faculty' && u2.role !== 'admin')) { $location.path('/home'); }
     }
   });
 
