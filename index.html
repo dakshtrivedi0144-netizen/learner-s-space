@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <title>Learner's Space — Unified Learning Portal</title>
-  <link rel="stylesheet" href="css/style.css?v=3" />
+  <link rel="stylesheet" href="css/style.css?v=4" />
 </head>
 <body>
 
@@ -14,6 +14,7 @@
     <a href="#!/home" class="brand">🎓 Learner's Space</a>
     <nav>
       <a href="#!/home" ng-if="getCurrentUser()">Home</a>
+      <a href="#!/admin" ng-if="getCurrentUser() && getCurrentUser().regNo === 'ADMIN001'" class="nav-admin">🛡️ Admin</a>
       <span class="nav-user" ng-if="getCurrentUser()">
         👤 {{ getCurrentUser().name }}
         <span class="nav-badge">Sem {{ getCurrentUser().semester }}</span>
@@ -43,6 +44,7 @@
   <script src="services/dataService.js?v=2"></script>
 
   <!-- Controllers -->
+  <script src="controllers/adminCtrl.js?v=1"></script>
   <script src="controllers/authCtrl.js?v=1"></script>
   <script src="controllers/homeCtrl.js?v=1"></script>
   <script src="controllers/dashboardCtrl.js?v=3"></script>

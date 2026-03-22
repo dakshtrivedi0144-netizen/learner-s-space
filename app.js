@@ -9,6 +9,10 @@ angular.module('learningPortalApp', ['ngRoute'])
       templateUrl: 'views/login.html',
       controller: 'AuthCtrl'
     })
+    .when('/admin', {
+      templateUrl: 'views/admin.html',
+      controller: 'AdminCtrl'
+    })
     .when('/home', {
       templateUrl: 'views/home.html',
       controller: 'HomeCtrl'
