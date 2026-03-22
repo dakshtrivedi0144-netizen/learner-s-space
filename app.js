@@ -5,17 +5,18 @@ angular.module('learningPortalApp', ['ngRoute'])
   $locationProvider.hashPrefix('!');
 
   $routeProvider
-    // Home - Semester Selector
+    .when('/login', {
+      templateUrl: 'views/login.html',
+      controller: 'AuthCtrl'
+    })
     .when('/home', {
       templateUrl: 'views/home.html',
       controller: 'HomeCtrl'
     })
-    // Semester - Subject List
     .when('/semester/:semId', {
       templateUrl: 'views/semester.html',
       controller: 'SemesterCtrl'
     })
-    // AngularJS (6th Sem)
     .when('/overview', {
       templateUrl: 'views/overview.html',
       controller: 'DashboardCtrl'
@@ -28,7 +29,6 @@ angular.module('learningPortalApp', ['ngRoute'])
       templateUrl: 'views/references.html',
       controller: 'ReferencesCtrl'
     })
-    // Cloud Computing (6th Sem)
     .when('/cc-overview', {
       templateUrl: 'views/cc-overview.html',
       controller: 'CCDashboardCtrl'
@@ -37,7 +37,6 @@ angular.module('learningPortalApp', ['ngRoute'])
       templateUrl: 'views/cc-practicals.html',
       controller: 'CCLabCtrl'
     })
-    // Data Mining & DW (6th Sem)
     .when('/dm-overview', {
       templateUrl: 'views/dm-overview.html',
       controller: 'DMDashboardCtrl'
@@ -46,5 +45,29 @@ angular.module('learningPortalApp', ['ngRoute'])
       templateUrl: 'views/dm-practicals.html',
       controller: 'DMLabCtrl'
     })
-    .otherwise({ redirectTo: '/home' });
+    .otherwise({ redirectTo: '/login' });
+}])
+
+.run(['$rootScope', '$location', function($rootScope, $location) {
+  var SESSION_KEY = 'ulp_session';
+
+  // Route guard — redirect to login if not authenticated
+  $rootScope.$on('$routeChangeStart', function(event, next) {
+    var isLogin = next.originalPath === '/login';
+    var session = localStorage.getItem(SESSION_KEY);
+    if (!isLogin && !session) {
+      $location.path('/login');
+    }
+  });
+
+  // Make current user available globally
+  $rootScope.getCurrentUser = function() {
+    try { return JSON.parse(localStorage.getItem(SESSION_KEY)); }
+    catch(e) { return null; }
+  };
+
+  $rootScope.logout = function() {
+    localStorage.removeItem(SESSION_KEY);
+    $location.path('/login');
+  };
 }]);
