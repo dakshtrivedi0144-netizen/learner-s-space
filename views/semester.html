@@ -1,10 +1,72 @@
 <div class="semester-page">
+
+  <!-- Header -->
   <div class="sem-page-header">
-    <a href="#!/home" class="back-btn">← Back to Semesters</a>
-    <h2>{{ semLabel }}</h2>
+    <div class="sem-page-top">
+      <div class="sem-welcome">
+        <span class="sem-welcome-icon">🎓</span>
+        <div>
+          <div class="sem-welcome-name">Welcome, {{ user.name }}</div>
+          <div class="sem-welcome-sub">{{ user.branch }} &bull; {{ userSemLabel }}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Semester Switcher Tabs -->
+    <div class="sem-switcher">
+      <button class="sem-tab" ng-repeat="s in allSems"
+              ng-class="{'active': s === semId, 'user-sem': s === user.semester*1}"
+              ng-click="goToSem(s)">
+        Sem {{ s }}
+        <span class="your-sem-dot" ng-if="s === user.semester*1" title="Your semester">●</span>
+      </button>
+    </div>
+
+    <h2>{{ semLabel }}
+      <span class="your-sem-badge" ng-if="isUserSem">Your Semester</span>
+    </h2>
     <p>BTech Computer Engineering</p>
   </div>
 
+  <!-- Announcements (only on user's semester) -->
+  <div class="announce-strip" ng-if="isUserSem && announcements.length > 0">
+    <span class="announce-strip-icon">📢</span>
+    <div class="announce-strip-text">
+      <strong>{{ announcements[0].by }}:</strong> {{ announcements[0].text }}
+    </div>
+    <span class="announce-strip-time">{{ announcements[0].createdAt | date:'dd MMM' }}</span>
+  </div>
+
+  <!-- Progress Rings (only on sem 6 where content exists) -->
+  <div class="progress-rings-section" ng-if="progressRings && progressRings.length">
+    <div class="section-label" style="margin-bottom:0.8rem">📈 Your Progress</div>
+    <div class="rings-row">
+      <div class="ring-card" ng-repeat="r in progressRings">
+        <svg width="80" height="80" viewBox="0 0 90 90">
+          <circle cx="45" cy="45" r="36" fill="none" stroke="#f0f2f5" stroke-width="8"/>
+          <circle cx="45" cy="45" r="36" fill="none" stroke="#c0392b" stroke-width="8"
+                  stroke-dasharray="{{ r.dash }} {{ r.gap }}"
+                  transform="rotate(-90 45 45)"
+                  style="transition:stroke-dasharray 0.6s ease"/>
+          <text x="45" y="50" text-anchor="middle" font-size="16" font-weight="700" fill="#2c3e50">{{ r.pct }}%</text>
+        </svg>
+        <div class="ring-label">{{ r.icon }} {{ r.name }}</div>
+        <div class="ring-sub">{{ r.done }}/{{ r.total }} done</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bookmarks (only on user's semester) -->
+  <div class="bookmarks-section" ng-if="isUserSem && bookmarks && bookmarks.length > 0">
+    <div class="section-label" style="margin-bottom:0.6rem">🔖 Bookmarked Practicals</div>
+    <div class="bookmark-chips">
+      <span class="bookmark-chip" ng-repeat="b in bookmarks | limitTo:6 track by b.id">
+        📌 {{ b.title | limitTo:28 }}{{ b.title.length > 28 ? '...' : '' }}
+      </span>
+    </div>
+  </div>
+
+  <!-- Subjects Grid -->
   <div class="subjects-grid">
     <div class="subject-card" ng-repeat="sub in subjects">
       <div class="subject-icon">{{ sub.icon }}</div>
@@ -12,14 +74,13 @@
       <p class="subject-code">{{ sub.code }} &bull; {{ sub.credits }} Credits</p>
 
       <div ng-if="!sub.comingSoon" class="subject-links">
-        <a ng-if="sub.links.syllabus" href="{{ sub.links.syllabus }}" class="btn-subject">📋 Syllabus</a>
-        <a ng-if="sub.links.lab" href="{{ sub.links.lab }}" class="btn-subject">🔬 Lab</a>
-        <a ng-if="sub.links.references" href="{{ sub.links.references }}" class="btn-subject">📚 References</a>
+        <a ng-if="sub.links.syllabus"   href="{{ sub.links.syllabus }}"   class="btn-subject">📋 Syllabus</a>
+        <a ng-if="sub.links.lab"        href="{{ sub.links.lab }}"        class="btn-subject">🔬 Lab</a>
+        <a ng-if="sub.links.references" href="{{ sub.links.references }}" class="btn-subject">📚 Refs</a>
       </div>
 
-      <div ng-if="sub.comingSoon" class="coming-soon-badge">
-        🚧 Coming Soon
-      </div>
+      <div ng-if="sub.comingSoon" class="coming-soon-badge">🚧 Coming Soon</div>
     </div>
   </div>
+
 </div>

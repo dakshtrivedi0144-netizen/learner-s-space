@@ -1890,3 +1890,114 @@ body.dark .role-tag.role-admin   { background: #2d0a0a; color: #e74c3c; }
   .kpi-row { grid-template-columns: repeat(2, 1fr); }
   .rings-row { justify-content: flex-start; }
 }
+
+/* ===== Semester Page — Enhanced ===== */
+.sem-page-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+  margin-bottom: 1rem;
+}
+
+.sem-welcome {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+.sem-welcome-icon { font-size: 2rem; }
+.sem-welcome-name { font-size: 1.1rem; font-weight: 700; color: #2c3e50; }
+.sem-welcome-sub  { font-size: 0.82rem; color: #7f8c8d; }
+
+/* Semester Switcher Tabs */
+.sem-switcher {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+
+.sem-tab {
+  padding: 7px 14px;
+  border: 1.5px solid #ddd;
+  background: #fff;
+  border-radius: 20px;
+  font-size: 0.82rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: #555;
+  position: relative;
+}
+.sem-tab:hover { border-color: #3498db; color: #3498db; }
+.sem-tab.active { background: #3498db; border-color: #3498db; color: #fff; font-weight: 700; }
+.sem-tab.user-sem { border-color: #c0392b; }
+.sem-tab.user-sem.active { background: #c0392b; border-color: #c0392b; }
+
+.your-sem-dot {
+  color: #c0392b;
+  font-size: 0.6rem;
+  vertical-align: super;
+  margin-left: 2px;
+}
+.sem-tab.active .your-sem-dot { color: #fff; }
+
+.your-sem-badge {
+  background: #c0392b;
+  color: #fff;
+  font-size: 0.7rem;
+  padding: 2px 8px;
+  border-radius: 12px;
+  margin-left: 8px;
+  font-weight: 600;
+  vertical-align: middle;
+}
+
+.sem-page-header h2 { font-size: 1.6rem; color: #2c3e50; margin-bottom: 0.2rem; }
+.sem-page-header p  { color: #7f8c8d; font-size: 0.88rem; margin-bottom: 1rem; }
+
+.section-label {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #555;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  display: block;
+}
+
+.ring-label { font-size: 0.82rem; font-weight: 700; color: #2c3e50; margin-top: 4px; }
+.ring-sub   { font-size: 0.75rem; color: #7f8c8d; }
+
+/* Announce strip on semester page */
+.announce-strip {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  background: linear-gradient(135deg, #2c3e50, #34495e);
+  color: #fff;
+  border-radius: 10px;
+  padding: 0.8rem 1.2rem;
+  margin-bottom: 1.2rem;
+  flex-wrap: wrap;
+}
+.announce-strip-icon { font-size: 1.2rem; flex-shrink: 0; }
+.announce-strip-text { flex: 1; font-size: 0.88rem; }
+.announce-strip-text strong { color: #f39c12; }
+.announce-strip-time { font-size: 0.75rem; color: rgba(255,255,255,0.6); white-space: nowrap; }
+
+/* Dark mode for new sem elements */
+body.dark .sem-tab { background: #16213e; border-color: #2a2a4a; color: #ccc; }
+body.dark .sem-tab:hover { border-color: #3498db; color: #3498db; }
+body.dark .sem-tab.active { background: #3498db; border-color: #3498db; color: #fff; }
+body.dark .sem-tab.user-sem { border-color: #c0392b; }
+body.dark .sem-tab.user-sem.active { background: #c0392b; border-color: #c0392b; }
+body.dark .sem-welcome-name { color: #e0e0e0; }
+body.dark .sem-page-header h2 { color: #e0e0e0; }
+body.dark .section-label { color: #aaa; }
+body.dark .ring-label { color: #e0e0e0; }
+
+@media (max-width: 768px) {
+  .sem-switcher { gap: 0.3rem; }
+  .sem-tab { padding: 5px 10px; font-size: 0.78rem; }
+  .sem-welcome-name { font-size: 0.95rem; }
+}
