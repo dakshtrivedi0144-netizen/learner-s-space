@@ -1,0 +1,145 @@
+angular.module('learningPortalApp')
+.factory('FirebaseService', [function() {
+
+  // ── KEYS ──────────────────────────────────────────────
+  var KEYS = {
+    users:      'ulp_users',
+    syllabus:   'ulp_syllabus',
+    practicals: 'ulp_practicals',
+    settings:   'ulp_settings',
+    labManuals: 'ulp_labManuals'
+  };
+
+  function get(key) {
+    try { return JSON.parse(localStorage.getItem(key)) || {}; } catch(e) { return {}; }
+  }
+  function getArr(key) {
+    try { return JSON.parse(localStorage.getItem(key)) || []; } catch(e) { return []; }
+  }
+  function set(key, val) { localStorage.setItem(key, JSON.stringify(val)); }
+
+  function resolved(val) {
+    return { then: function(fn) { var r = fn(val); return resolved(r); }, catch: function() { return this; } };
+  }
+  function rejected(msg) {
+    return { then: function() { return this; }, catch: function(fn) { fn(msg); return this; } };
+  }
+
+  return {
+
+    // ── AUTH ──────────────────────────────────────────────
+    register: function(userData) {
+      var users = get(KEYS.users);
+      var regNo = userData.regNo.toUpperCase();
+      if (users[regNo]) return rejected('Registration number already exists.');
+      users[regNo] = {
+        name: userData.name,
+        regNo: regNo,
+        faculty: userData.faculty,
+        branch: userData.branch,
+        semester: userData.semester,
+        role: userData.role || 'student',
+        password: userData.password,
+        createdAt: new Date().toISOString()
+      };
+      set(KEYS.users, users);
+      return resolved();
+    },
+
+    login: function(regNo, password) {
+      var users = get(KEYS.users);
+      var u = users[regNo.toUpperCase()];
+      if (!u) return rejected('Invalid registration number or password.');
+      if (u.password !== password) return rejected('Invalid registration number or password.');
+      return resolved(u);
+    },
+
+    // ── ADMIN ─────────────────────────────────────────────
+    getAllUsers: function() {
+      var users = get(KEYS.users);
+      var list = Object.values(users).sort(function(a,b) { return b.createdAt > a.createdAt ? 1 : -1; });
+      return resolved(list);
+    },
+
+    updateUserRole: function(regNo, role) {
+      var users = get(KEYS.users);
+      if (!users[regNo]) return rejected('User not found.');
+      users[regNo].role = role;
+      set(KEYS.users, users);
+      return resolved();
+    },
+
+    deleteUser: function(regNo) {
+      var users = get(KEYS.users);
+      delete users[regNo];
+      set(KEYS.users, users);
+      return resolved();
+    },
+
+    // ── FACULTY: SYLLABUS ─────────────────────────────────
+    getSyllabus: function(subjectId) {
+      var all = get(KEYS.syllabus);
+      return resolved(all[subjectId] || null);
+    },
+
+    saveSyllabus: function(subjectId, data) {
+      var all = get(KEYS.syllabus);
+      all[subjectId] = data;
+      set(KEYS.syllabus, all);
+      return resolved();
+    },
+
+    // ── FACULTY: PRACTICALS ───────────────────────────────
+    getPracticals: function(subjectId) {
+      var all = get(KEYS.practicals);
+      return resolved(all[subjectId] || []);
+    },
+
+    savePracticals: function(subjectId, list) {
+      var all = get(KEYS.practicals);
+      all[subjectId] = list;
+      set(KEYS.practicals, all);
+      return resolved();
+    },
+
+    // ── FACULTY: UPLOAD PERMISSION ────────────────────────
+    getUploadSettings: function(subjectId) {
+      var all = get(KEYS.settings);
+      return resolved(all[subjectId] || { uploadAllowed: false });
+    },
+
+    setUploadAllowed: function(subjectId, allowed) {
+      var all = get(KEYS.settings);
+      all[subjectId] = { uploadAllowed: allowed };
+      set(KEYS.settings, all);
+      return resolved();
+    },
+
+    // ── STUDENT: LAB MANUAL ───────────────────────────────
+    submitLabManual: function(subjectId, regNo, data) {
+      var all = get(KEYS.labManuals);
+      var key = subjectId + '_' + regNo;
+      all[key] = {
+        subjectId: subjectId,
+        regNo: regNo,
+        fileName: data.fileName || '',
+        fileUrl: data.fileUrl || '',
+        notes: data.notes || '',
+        submittedAt: new Date().toISOString()
+      };
+      set(KEYS.labManuals, all);
+      return resolved();
+    },
+
+    getLabManuals: function(subjectId) {
+      var all = get(KEYS.labManuals);
+      var list = Object.values(all).filter(function(m) { return m.subjectId === subjectId; });
+      return resolved(list);
+    },
+
+    getMyLabManual: function(subjectId, regNo) {
+      var all = get(KEYS.labManuals);
+      return resolved(all[subjectId + '_' + regNo] || null);
+    }
+  };
+}]);

@@ -62,6 +62,20 @@ angular.module('learningPortalApp', ['ngRoute'])
 
 .run(['$rootScope', '$location', function($rootScope, $location) {
   var SESSION_KEY = 'ulp_session';
+  var USERS_KEY   = 'ulp_users';
+
+  // Seed demo accounts on first load
+  var users = JSON.parse(localStorage.getItem(USERS_KEY) || '{}');
+  if (!users['ADMIN001']) {
+    users['ADMIN001'] = { name:'Admin User', regNo:'ADMIN001', faculty:'Faculty of Engineering & Technology', branch:'Computer Engineering', semester:'6', role:'admin', password:'Admin@123', createdAt: new Date().toISOString() };
+  }
+  if (!users['FAC001']) {
+    users['FAC001'] = { name:'Prof. Sharma', regNo:'FAC001', faculty:'Faculty of Engineering & Technology', branch:'Computer Engineering', semester:'6', role:'faculty', password:'Faculty@123', createdAt: new Date().toISOString() };
+  }
+  if (!users['STU001']) {
+    users['STU001'] = { name:'Daksh Trivedi', regNo:'STU001', faculty:'Faculty of Engineering & Technology', branch:'Computer Engineering', semester:'6', role:'student', password:'Student@123', createdAt: new Date().toISOString() };
+  }
+  localStorage.setItem(USERS_KEY, JSON.stringify(users));
 
   // Route guard — redirect to login if not authenticated
   $rootScope.$on('$routeChangeStart', function(event, next) {
