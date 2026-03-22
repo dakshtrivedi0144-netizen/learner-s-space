@@ -5,9 +5,15 @@ angular.module('learningPortalApp', ['ngRoute'])
   $locationProvider.hashPrefix('!');
 
   $routeProvider
-    // Home
+    // Home - Semester Selector
     .when('/home', {
-      templateUrl: 'views/home.html'
+      templateUrl: 'views/home.html',
+      controller: 'HomeCtrl'
+    })
+    // Semester - Subject List
+    .when('/semester/:semId', {
+      templateUrl: 'views/semester.html',
+      controller: 'SemesterCtrl'
     })
     // AngularJS (6th Sem)
     .when('/overview', {

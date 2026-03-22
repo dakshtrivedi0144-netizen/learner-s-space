@@ -1,0 +1,25 @@
+<div class="semester-page">
+  <div class="sem-page-header">
+    <a href="#!/home" class="back-btn">← Back to Semesters</a>
+    <h2>{{ semLabel }}</h2>
+    <p>BTech Computer Engineering</p>
+  </div>
+
+  <div class="subjects-grid">
+    <div class="subject-card" ng-repeat="sub in subjects">
+      <div class="subject-icon">{{ sub.icon }}</div>
+      <h3>{{ sub.name }}</h3>
+      <p class="subject-code">{{ sub.code }} &bull; {{ sub.credits }} Credits</p>
+
+      <div ng-if="!sub.comingSoon" class="subject-links">
+        <a ng-if="sub.links.syllabus" href="{{ sub.links.syllabus }}" class="btn-subject">📋 Syllabus</a>
+        <a ng-if="sub.links.lab" href="{{ sub.links.lab }}" class="btn-subject">🔬 Lab</a>
+        <a ng-if="sub.links.references" href="{{ sub.links.references }}" class="btn-subject">📚 References</a>
+      </div>
+
+      <div ng-if="sub.comingSoon" class="coming-soon-badge">
+        🚧 Coming Soon
+      </div>
+    </div>
+  </div>
+</div>
