@@ -5,6 +5,11 @@ angular.module('learningPortalApp', ['ngRoute'])
   $locationProvider.hashPrefix('!');
 
   $routeProvider
+    // Home
+    .when('/home', {
+      templateUrl: 'views/home.html'
+    })
+    // AngularJS (6th Sem)
     .when('/overview', {
       templateUrl: 'views/overview.html',
       controller: 'DashboardCtrl'
@@ -17,5 +22,14 @@ angular.module('learningPortalApp', ['ngRoute'])
       templateUrl: 'views/references.html',
       controller: 'ReferencesCtrl'
     })
-    .otherwise({ redirectTo: '/overview' });
+    // Cloud Computing (6th Sem)
+    .when('/cc-overview', {
+      templateUrl: 'views/cc-overview.html',
+      controller: 'CCDashboardCtrl'
+    })
+    .when('/cc-practicals', {
+      templateUrl: 'views/cc-practicals.html',
+      controller: 'CCLabCtrl'
+    })
+    .otherwise({ redirectTo: '/home' });
 }]);

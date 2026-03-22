@@ -11,11 +11,18 @@
 
   <!-- Navigation Bar -->
   <header class="navbar">
-    <a href="#!/overview" class="brand">&#127979; Learning Portal</a>
+    <a href="#!/home" class="brand">&#127979; Learning Portal</a>
     <nav>
-      <a href="#!/overview">Course Overview</a>
-      <a href="#!/practicals">Practicals</a>
+      <a href="#!/home">Home</a>
+      <span class="nav-divider">|</span>
+      <span class="nav-label">AngularJS:</span>
+      <a href="#!/overview">Syllabus</a>
+      <a href="#!/practicals">Lab</a>
       <a href="#!/references">References</a>
+      <span class="nav-divider">|</span>
+      <span class="nav-label">Cloud Computing:</span>
+      <a href="#!/cc-overview">Syllabus</a>
+      <a href="#!/cc-practicals">Lab</a>
     </nav>
   </header>
 
@@ -35,10 +42,12 @@
   <script src="services/dataService.js?v=2"></script>
 
   <!-- Controllers -->
-  <script src="controllers/dashboardCtrl.js?v=2"></script>
-  <script src="controllers/submissionCtrl.js?v=2"></script>
-  <script src="controllers/labCtrl.js?v=2"></script>
-  <script src="controllers/referencesCtrl.js?v=2"></script>
+  <script src="controllers/dashboardCtrl.js?v=3"></script>
+  <script src="controllers/submissionCtrl.js?v=3"></script>
+  <script src="controllers/labCtrl.js?v=3"></script>
+  <script src="controllers/referencesCtrl.js?v=3"></script>
+  <script src="controllers/ccDashboardCtrl.js?v=1"></script>
+  <script src="controllers/ccLabCtrl.js?v=1"></script>
 
   <!-- Directives -->
   <script src="directives/statusCard.js?v=2"></script>
