@@ -1,6 +1,9 @@
 <div class="labmanual-page">
   <div class="lm-header">
-    <a ng-click="goBack()" class="back-btn">← Back</a>
+    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+      <a ng-click="goBack()" class="back-btn">← Back</a>
+      <button class="btn-print" onclick="window.print()" title="Print / Save as PDF">🖨️ Print / PDF</button>
+    </div>
     <h2>📤 Lab Manual Submission</h2>
     <p>{{ subjectName }}</p>
   </div>

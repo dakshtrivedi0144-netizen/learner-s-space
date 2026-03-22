@@ -4,101 +4,190 @@
   <div class="admin-header">
     <div>
       <h2>🛡️ Admin Panel</h2>
-      <p>Manage users, content, submissions and notifications</p>
+      <p>Manage users, content, analytics and announcements</p>
     </div>
     <div class="admin-stats">
       <div class="stat-box"><span class="stat-num">{{ users.length }}</span><span class="stat-label">Total Users</span></div>
       <div class="stat-box"><span class="stat-num">{{ roleCount('student') }}</span><span class="stat-label">Students</span></div>
       <div class="stat-box"><span class="stat-num">{{ roleCount('faculty') }}</span><span class="stat-label">Faculty</span></div>
       <div class="stat-box stat-notif" ng-click="tab='notifications'">
-        <span class="stat-num notif-num">{{ unreadCount }}</span>
-        <span class="stat-label">New Alerts</span>
+        <span class="stat-num notif-num">{{ unreadCount }}</span><span class="stat-label">Alerts</span>
+      </div>
+      <div class="stat-box" ng-if="pendingUsers.length>0" ng-click="tab='pending'" style="cursor:pointer">
+        <span class="stat-num" style="color:#e67e22">{{ pendingUsers.length }}</span><span class="stat-label">Pending</span>
       </div>
     </div>
   </div>
 
   <!-- Tabs -->
   <div class="admin-tabs">
+    <button class="ftab" ng-class="{active: tab==='dashboard'}"     ng-click="tab='dashboard'">📊 Dashboard</button>
     <button class="ftab" ng-class="{active: tab==='users'}"         ng-click="tab='users'">👥 Users</button>
     <button class="ftab" ng-class="{active: tab==='roles'}"         ng-click="tab='roles'">🔑 Roles</button>
     <button class="ftab" ng-class="{active: tab==='assignments'}"   ng-click="tab='assignments'">📚 Assignments</button>
     <button class="ftab" ng-class="{active: tab==='content'}"       ng-click="tab='content'">📖 Content</button>
     <button class="ftab" ng-class="{active: tab==='submissions'}"   ng-click="tab='submissions'">📋 Submissions</button>
-    <button class="ftab notif-tab" ng-class="{active: tab==='notifications'}" ng-click="tab='notifications'">
-      🔔 Notifications <span class="notif-badge" ng-if="unreadCount > 0">{{ unreadCount }}</span>
+    <button class="ftab" ng-class="{active: tab==='announcements'}" ng-click="tab='announcements'">📢 Announce</button>
+    <button class="ftab" ng-class="{active: tab==='pending'}"       ng-click="tab='pending'">
+      ⏳ Approvals <span class="notif-badge" ng-if="pendingUsers.length>0">{{ pendingUsers.length }}</span>
     </button>
-  </div>
-
-  <!-- Toolbar (for user tabs) -->
-  <div class="admin-toolbar" ng-if="tab==='users' || tab==='roles'">
-    <input type="text" class="admin-search" placeholder="🔍 Search name, reg no, branch..." ng-model="searchTerm" />
-    <select class="admin-filter" ng-model="filterSem">
-      <option value="">All Semesters</option>
-      <option ng-repeat="s in [3,4,5,6,7,8]" value="{{ s }}">Sem {{ s }}</option>
-    </select>
-    <select class="admin-filter" ng-model="filterRole">
-      <option value="">All Roles</option>
-      <option value="student">Student</option>
-      <option value="faculty">Faculty</option>
-      <option value="admin">Admin</option>
-    </select>
+    <button class="ftab" ng-class="{active: tab==='audit'}"         ng-click="tab='audit'">🗂️ Audit Log</button>
+    <button class="ftab notif-tab" ng-class="{active: tab==='notifications'}" ng-click="tab='notifications'">
+      🔔 Alerts <span class="notif-badge" ng-if="unreadCount>0">{{ unreadCount }}</span>
+    </button>
   </div>
 
   <div class="admin-loading" ng-if="loading"><div class="spinner"></div><p>Loading...</p></div>
   <div class="admin-error"   ng-if="error">⚠️ {{ error }}</div>
   <div class="save-alert success" ng-if="actionMsg">✅ {{ actionMsg }}</div>
 
+  <!-- ══ DASHBOARD / ANALYTICS ══ -->
+  <div ng-if="!loading && tab==='dashboard'" class="dashboard-panel">
+    <div ng-if="!analytics" class="admin-loading"><div class="spinner"></div></div>
+    <div ng-if="analytics">
+
+      <!-- KPI Cards -->
+      <div class="kpi-row">
+        <div class="kpi-card kpi-blue">
+          <div class="kpi-icon">👥</div>
+          <div class="kpi-val">{{ analytics.totalStudents }}</div>
+          <div class="kpi-label">Students</div>
+        </div>
+        <div class="kpi-card kpi-orange">
+          <div class="kpi-icon">👩‍🏫</div>
+          <div class="kpi-val">{{ analytics.totalFaculty }}</div>
+          <div class="kpi-label">Faculty</div>
+        </div>
+        <div class="kpi-card kpi-green">
+          <div class="kpi-icon">📋</div>
+          <div class="kpi-val">{{ analytics.totalSubmissions }}</div>
+          <div class="kpi-label">Submissions</div>
+        </div>
+        <div class="kpi-card kpi-red">
+          <div class="kpi-icon">📚</div>
+          <div class="kpi-val">{{ analytics.totalPracticals['angularjs'] + analytics.totalPracticals['cloud-computing'] + analytics.totalPracticals['dm-dw'] }}</div>
+          <div class="kpi-label">Practicals</div>
+        </div>
+      </div>
+
+      <!-- Bar Chart: Submissions per Subject -->
+      <div class="chart-card">
+        <div class="chart-title">📊 Lab Manual Submissions by Subject</div>
+        <div class="bar-chart">
+          <div class="bar-group" ng-repeat="b in chartBars">
+            <div class="bar-wrap">
+              <div class="bar-fill" ng-style="{'height': b.pct + '%'}">
+                <span class="bar-val">{{ b.count }}</span>
+              </div>
+            </div>
+            <div class="bar-label">{{ b.label }}</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Student Progress Table -->
+      <div class="chart-card">
+        <div class="chart-title">🎓 Student Completion Overview</div>
+        <div ng-if="analytics.studentStats.length===0" class="no-data-sm">No students yet.</div>
+        <div class="progress-table-wrap">
+          <table class="admin-table" ng-if="analytics.studentStats.length>0">
+            <thead><tr><th>#</th><th>Student</th><th>Reg No</th><th>Completed</th><th>Progress</th></tr></thead>
+            <tbody>
+              <tr ng-repeat="s in analytics.studentStats track by s.regNo" ng-class="{'row-even':$even}">
+                <td>{{ $index+1 }}</td>
+                <td><span class="user-avatar">{{ s.name[0] }}</span> {{ s.name }}</td>
+                <td><code>{{ s.regNo }}</code></td>
+                <td>{{ s.done }} / {{ s.total }}</td>
+                <td>
+                  <div class="mini-progress-wrap">
+                    <div class="mini-progress-fill" ng-style="{'width': s.pct + '%'}" ng-class="s.pct>=80?'prog-green':s.pct>=40?'prog-orange':'prog-red'"></div>
+                  </div>
+                  <span class="pct-label">{{ s.pct }}%</span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
   <!-- ══ USERS ══ -->
-  <div class="admin-table-wrap" ng-if="!loading && tab==='users'">
-    <table class="admin-table">
-      <thead><tr><th>#</th><th>Name</th><th>Reg No</th><th>Branch</th><th>Sem</th><th>Role</th><th>Joined</th></tr></thead>
-      <tbody>
-        <tr ng-repeat="u in filteredUsers() track by u.regNo" ng-class="{'row-even':$even}">
-          <td>{{ $index+1 }}</td>
-          <td><span class="user-avatar">{{ u.name[0] }}</span> {{ u.name }}</td>
-          <td><code>{{ u.regNo }}</code></td>
-          <td><span class="branch-tag">{{ u.branch }}</span></td>
-          <td><span class="sem-tag">Sem {{ u.semester }}</span></td>
-          <td><span class="role-tag role-{{ u.role||'student' }}">{{ u.role||'student' }}</span></td>
-          <td class="td-small">{{ u.createdAt | date:'dd MMM yy' }}</td>
-        </tr>
-        <tr ng-if="filteredUsers().length===0"><td colspan="7" class="no-data">No users found.</td></tr>
-      </tbody>
-    </table>
+  <div ng-if="!loading && tab==='users'">
+    <div class="admin-toolbar">
+      <input type="text" class="admin-search" placeholder="🔍 Search name, reg no, branch..." ng-model="searchTerm" />
+      <select class="admin-filter" ng-model="filterSem">
+        <option value="">All Semesters</option>
+        <option ng-repeat="s in [3,4,5,6,7,8]" value="{{ s }}">Sem {{ s }}</option>
+      </select>
+      <select class="admin-filter" ng-model="filterRole">
+        <option value="">All Roles</option>
+        <option value="student">Student</option>
+        <option value="faculty">Faculty</option>
+        <option value="admin">Admin</option>
+      </select>
+    </div>
+    <div class="admin-table-wrap">
+      <table class="admin-table">
+        <thead><tr><th>#</th><th>Name</th><th>Reg No</th><th>Branch</th><th>Sem</th><th>Role</th><th>Joined</th></tr></thead>
+        <tbody>
+          <tr ng-repeat="u in filteredUsers() track by u.regNo" ng-class="{'row-even':$even}">
+            <td>{{ $index+1 }}</td>
+            <td><span class="user-avatar">{{ u.name[0] }}</span> {{ u.name }}</td>
+            <td><code>{{ u.regNo }}</code></td>
+            <td><span class="branch-tag">{{ u.branch }}</span></td>
+            <td><span class="sem-tag">Sem {{ u.semester }}</span></td>
+            <td><span class="role-tag role-{{ u.role||'student' }}">{{ u.role||'student' }}</span></td>
+            <td class="td-small">{{ u.createdAt | date:'dd MMM yy' }}</td>
+          </tr>
+          <tr ng-if="filteredUsers().length===0"><td colspan="7" class="no-data">No users found.</td></tr>
+        </tbody>
+      </table>
+    </div>
   </div>
 
   <!-- ══ ROLES ══ -->
-  <div class="admin-table-wrap" ng-if="!loading && tab==='roles'">
-    <table class="admin-table">
-      <thead><tr><th>#</th><th>Name</th><th>Reg No</th><th>Current Role</th><th>Change Role</th><th>Action</th></tr></thead>
-      <tbody>
-        <tr ng-repeat="u in filteredUsers() track by u.regNo" ng-class="{'row-even':$even}">
-          <td>{{ $index+1 }}</td>
-          <td><span class="user-avatar">{{ u.name[0] }}</span> {{ u.name }}</td>
-          <td><code>{{ u.regNo }}</code></td>
-          <td><span class="role-tag role-{{ u.role||'student' }}">{{ u.role||'student' }}</span></td>
-          <td>
-            <select ng-model="u.newRole" class="role-select">
-              <option value="student">Student</option>
-              <option value="faculty">Faculty</option>
-              <option value="admin">Admin</option>
-            </select>
-          </td>
-          <td>
-            <button class="btn-role-save" ng-click="updateRole(u)">Update</button>
-            <button class="btn-role-del"  ng-click="deleteUser(u)">Delete</button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+  <div ng-if="!loading && tab==='roles'">
+    <div class="admin-toolbar">
+      <input type="text" class="admin-search" placeholder="🔍 Search..." ng-model="searchTerm" />
+      <select class="admin-filter" ng-model="filterRole">
+        <option value="">All Roles</option>
+        <option value="student">Student</option>
+        <option value="faculty">Faculty</option>
+        <option value="admin">Admin</option>
+      </select>
+    </div>
+    <div class="admin-table-wrap">
+      <table class="admin-table">
+        <thead><tr><th>#</th><th>Name</th><th>Reg No</th><th>Current Role</th><th>Change Role</th><th>Action</th></tr></thead>
+        <tbody>
+          <tr ng-repeat="u in filteredUsers() track by u.regNo" ng-class="{'row-even':$even}">
+            <td>{{ $index+1 }}</td>
+            <td><span class="user-avatar">{{ u.name[0] }}</span> {{ u.name }}</td>
+            <td><code>{{ u.regNo }}</code></td>
+            <td><span class="role-tag role-{{ u.role||'student' }}">{{ u.role||'student' }}</span></td>
+            <td>
+              <select ng-model="u.newRole" class="role-select">
+                <option value="student">Student</option>
+                <option value="faculty">Faculty</option>
+                <option value="admin">Admin</option>
+              </select>
+            </td>
+            <td>
+              <button class="btn-role-save" ng-click="updateRole(u)">Update</button>
+              <button class="btn-role-del"  ng-click="deleteUser(u)">Delete</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   </div>
 
   <!-- ══ ASSIGNMENTS ══ -->
   <div ng-if="!loading && tab==='assignments'">
     <div class="assign-info-bar">📌 Assign subjects to faculty. Faculty can only manage their assigned subjects.</div>
-    <div ng-if="facultyList.length===0" class="no-data" style="padding:2rem;text-align:center;">
-      No faculty found. Promote users to Faculty role first.
-    </div>
+    <div ng-if="facultyList.length===0" class="no-data" style="padding:2rem;text-align:center;">No faculty found. Promote users to Faculty role first.</div>
     <div class="assign-grid" ng-if="facultyList.length>0">
       <div class="assign-card" ng-repeat="f in facultyList track by f.regNo">
         <div class="assign-card-header">
@@ -118,34 +207,21 @@
     </div>
   </div>
 
-  <!-- ══ CONTENT (Practicals + Theory) ══ -->
+  <!-- ══ CONTENT ══ -->
   <div ng-if="!loading && tab==='content'" class="content-panel">
     <div class="content-subject-bar">
-      <button class="pill" ng-repeat="s in allSubjects"
-              ng-class="{active: contentSubject.id===s.id}"
-              ng-click="selectContentSubject(s)">
-        {{ s.icon }} {{ s.name }}
-      </button>
+      <button class="pill" ng-repeat="s in allSubjects" ng-class="{active: contentSubject.id===s.id}" ng-click="selectContentSubject(s)">{{ s.icon }} {{ s.name }}</button>
     </div>
-
     <div class="admin-loading" ng-if="loadingContent"><div class="spinner"></div></div>
-
     <div ng-if="!loadingContent" class="content-two-col">
-
-      <!-- Practicals list -->
       <div class="content-col">
         <div class="content-col-header">🔬 Practicals <span class="count-badge">{{ contentPracticals.length }}</span></div>
-        <div ng-if="contentPracticals.length===0" class="no-data-sm">No practicals saved yet by faculty.</div>
+        <div ng-if="contentPracticals.length===0" class="no-data-sm">No practicals saved yet.</div>
         <div class="content-practical-item" ng-repeat="p in contentPracticals track by $index">
           <div class="cpi-num">{{ $index+1 }}</div>
-          <div class="cpi-body">
-            <div class="cpi-title">{{ p.title }}</div>
-            <div class="cpi-aim" ng-if="p.aim">{{ p.aim }}</div>
-          </div>
+          <div class="cpi-body"><div class="cpi-title">{{ p.title }}</div><div class="cpi-aim" ng-if="p.aim">{{ p.aim }}</div></div>
         </div>
       </div>
-
-      <!-- Theory / Syllabus units -->
       <div class="content-col">
         <div class="content-col-header">📖 Theory Units <span class="count-badge">{{ contentTheory.length }}</span></div>
         <div ng-if="contentTheory.length===0" class="no-data-sm">No theory units saved yet.</div>
@@ -155,12 +231,9 @@
             <span class="cti-title">{{ u.title }}</span>
             <span class="hours-badge" ng-if="u.hours">{{ u.hours }}h</span>
           </div>
-          <ul class="cti-topics" ng-if="u.topics && u.topics.length">
-            <li ng-repeat="t in u.topics">{{ t.name }}</li>
-          </ul>
+          <ul class="cti-topics" ng-if="u.topics && u.topics.length"><li ng-repeat="t in u.topics">{{ t.name }}</li></ul>
         </div>
       </div>
-
     </div>
   </div>
 
@@ -196,19 +269,80 @@
     </div>
   </div>
 
+  <!-- ══ ANNOUNCEMENTS ══ -->
+  <div ng-if="!loading && tab==='announcements'" class="announce-panel">
+    <div class="announce-compose">
+      <textarea ng-model="newAnnouncement" placeholder="Write an announcement for all students..." class="announce-textarea" rows="3"></textarea>
+      <button class="btn-save" ng-click="postAnnouncement()" ng-disabled="postingAnnounce || !newAnnouncement.trim()">
+        {{ postingAnnounce ? 'Posting...' : '📢 Post Announcement' }}
+      </button>
+    </div>
+    <div ng-if="announcements.length===0" class="no-data" style="padding:2rem;text-align:center;">No announcements yet.</div>
+    <div class="announce-list">
+      <div class="announce-item" ng-repeat="a in announcements track by a.id">
+        <div class="announce-body">
+          <div class="announce-text">{{ a.text }}</div>
+          <div class="announce-meta">Posted by {{ a.by }} · {{ a.createdAt | date:'dd MMM yyyy, hh:mm a' }}</div>
+        </div>
+        <button class="btn-del" ng-click="deleteAnnouncement(a.id)" title="Delete">🗑️</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ PENDING APPROVALS ══ -->
+  <div ng-if="!loading && tab==='pending'" class="pending-panel">
+    <div class="assign-info-bar">⏳ Students who self-registered and are awaiting your approval.</div>
+    <div ng-if="pendingUsers.length===0" class="no-data" style="padding:2rem;text-align:center;">No pending registrations.</div>
+    <div class="admin-table-wrap" ng-if="pendingUsers.length>0">
+      <table class="admin-table">
+        <thead><tr><th>#</th><th>Name</th><th>Reg No</th><th>Branch</th><th>Sem</th><th>Submitted</th><th>Action</th></tr></thead>
+        <tbody>
+          <tr ng-repeat="p in pendingUsers track by p.id" ng-class="{'row-even':$even}">
+            <td>{{ $index+1 }}</td>
+            <td><span class="user-avatar">{{ p.name[0] }}</span> {{ p.name }}</td>
+            <td><code>{{ p.regNo }}</code></td>
+            <td><span class="branch-tag">{{ p.branch }}</span></td>
+            <td><span class="sem-tag">Sem {{ p.semester }}</span></td>
+            <td class="td-small">{{ p.submittedAt | date:'dd MMM yy' }}</td>
+            <td>
+              <button class="btn-role-save" ng-click="approveUser(p)">✅ Approve</button>
+              <button class="btn-role-del"  ng-click="rejectUser(p)">❌ Reject</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ══ AUDIT LOG ══ -->
+  <div ng-if="!loading && tab==='audit'" class="audit-panel">
+    <div class="assign-info-bar">🗂️ All system actions are logged here automatically.</div>
+    <div ng-if="auditLog.length===0" class="no-data" style="padding:2rem;text-align:center;">No audit entries yet.</div>
+    <div class="admin-table-wrap" ng-if="auditLog.length>0">
+      <table class="admin-table">
+        <thead><tr><th>#</th><th>Action</th><th>By</th><th>Detail</th><th>Time</th></tr></thead>
+        <tbody>
+          <tr ng-repeat="a in auditLog track by a.id" ng-class="{'row-even':$even}">
+            <td>{{ $index+1 }}</td>
+            <td><span class="audit-action audit-{{ a.action | lowercase }}">{{ a.action }}</span></td>
+            <td><code>{{ a.by }}</code></td>
+            <td class="td-small">{{ a.detail }}</td>
+            <td class="td-small">{{ a.at | date:'dd MMM yy, hh:mm a' }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
   <!-- ══ NOTIFICATIONS ══ -->
   <div ng-if="!loading && tab==='notifications'" class="notif-panel">
     <div class="notif-toolbar">
       <span class="section-label">🔔 Lab Manual Submission Alerts</span>
       <button class="btn-role-save" ng-if="unreadCount>0" ng-click="markAllRead()">Mark All Read</button>
     </div>
-    <div ng-if="notifications.length===0" class="no-data" style="padding:2rem;text-align:center;">
-      No notifications yet. They appear when students submit lab manuals.
-    </div>
+    <div ng-if="notifications.length===0" class="no-data" style="padding:2rem;text-align:center;">No notifications yet.</div>
     <div class="notif-list">
-      <div class="notif-item" ng-repeat="n in notifications track by n.id"
-           ng-class="{unread: isUnread(n)}"
-           ng-click="markRead(n)">
+      <div class="notif-item" ng-repeat="n in notifications track by n.id" ng-class="{unread: isUnread(n)}" ng-click="markRead(n)">
         <div class="notif-icon">📄</div>
         <div class="notif-body">
           <div class="notif-msg">{{ n.message }}</div>

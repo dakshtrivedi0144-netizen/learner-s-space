@@ -34,6 +34,7 @@
       <button class="ftab" ng-class="{active: tab==='theory'}"      ng-click="tab='theory'">📖 Theory</button>
       <button class="ftab" ng-class="{active: tab==='upload'}"      ng-click="tab='upload'">📤 Upload Permission</button>
       <button class="ftab" ng-class="{active: tab==='submissions'}" ng-click="tab='submissions'">📋 Submissions</button>
+      <button class="ftab" ng-class="{active: tab==='progress'}"    ng-click="tab='progress'">📊 Student Progress</button>
       <button class="ftab notif-tab" ng-class="{active: tab==='notifications'}" ng-click="tab='notifications'">
         🔔 Notifications <span class="notif-badge" ng-if="unreadCount>0">{{ unreadCount }}</span>
       </button>
@@ -102,6 +103,39 @@
           <input type="checkbox" ng-model="uploadAllowed" ng-change="toggleUpload()" />
           <span class="slider"></span>
         </label>
+      </div>
+      <div class="deadline-card">
+        <label class="section-label">📅 Submission Deadline (optional)</label>
+        <div class="deadline-row">
+          <input type="datetime-local" ng-model="deadline" class="deadline-input" />
+          <button class="btn-role-save" ng-click="saveDeadline()">Save Deadline</button>
+        </div>
+        <p class="panel-desc" ng-if="deadline">Deadline set: <strong>{{ deadline | date:'dd MMM yyyy, hh:mm a' }}</strong></p>
+      </div>
+    </div>
+
+    <!-- ── STUDENT PROGRESS ── -->
+    <div ng-if="tab==='progress'" class="faculty-panel">
+      <h3>Student Progress — {{ selected.name }}</h3>
+      <p class="panel-desc">How many practicals each student has completed.</p>
+      <div ng-if="studentProgress.length===0" class="no-data-sm">No student data available.</div>
+      <div class="admin-table-wrap" ng-if="studentProgress.length>0">
+        <table class="admin-table">
+          <thead><tr><th>#</th><th>Student</th><th>Reg No</th><th>Completed</th><th>Progress</th></tr></thead>
+          <tbody>
+            <tr ng-repeat="s in studentProgress track by s.regNo" ng-class="{'row-even':$even}">
+              <td>{{ $index+1 }}</td>
+              <td><span class="user-avatar">{{ s.name[0] }}</span> {{ s.name }}</td>
+              <td><code>{{ s.regNo }}</code></td>
+              <td>{{ s.completed }}</td>
+              <td>
+                <div class="mini-progress-wrap">
+                  <div class="mini-progress-fill prog-green" ng-style="{'width': (s.completed > 0 ? '60' : '0') + '%'}"></div>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
 

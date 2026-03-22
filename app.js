@@ -57,6 +57,10 @@ angular.module('learningPortalApp', ['ngRoute'])
       templateUrl: 'views/lab-manual.html',
       controller: 'LabManualCtrl'
     })
+    .when('/change-password', {
+      templateUrl: 'views/change-password.html',
+      controller: 'ChangePasswordCtrl'
+    })
     .otherwise({ redirectTo: '/login' });
 }])
 
@@ -242,4 +246,36 @@ angular.module('learningPortalApp', ['ngRoute'])
     localStorage.removeItem(SESSION_KEY);
     $location.path('/login');
   };
+
+  // ── Dark Mode ─────────────────────────────────────────
+  $rootScope.darkMode = localStorage.getItem('ulp_darkmode') === '1';
+  if ($rootScope.darkMode) document.body.classList.add('dark');
+  $rootScope.toggleDark = function() {
+    $rootScope.darkMode = !$rootScope.darkMode;
+    localStorage.setItem('ulp_darkmode', $rootScope.darkMode ? '1' : '0');
+    document.body.classList.toggle('dark', $rootScope.darkMode);
+  };
+
+  // ── Session Timeout (30 min inactivity) ──────────────
+  var TIMEOUT_MS = 30 * 60 * 1000;
+  var lastActivity = Date.now();
+  var timeoutTimer;
+
+  function resetTimer() {
+    lastActivity = Date.now();
+    clearTimeout(timeoutTimer);
+    timeoutTimer = setTimeout(function() {
+      var session = localStorage.getItem(SESSION_KEY);
+      if (session) {
+        localStorage.removeItem(SESSION_KEY);
+        $rootScope.$apply(function() { $location.path('/login'); });
+        alert('Session expired due to inactivity. Please log in again.');
+      }
+    }, TIMEOUT_MS);
+  }
+
+  document.addEventListener('click', resetTimer);
+  document.addEventListener('keypress', resetTimer);
+  document.addEventListener('mousemove', resetTimer);
+  resetTimer();
 }]);

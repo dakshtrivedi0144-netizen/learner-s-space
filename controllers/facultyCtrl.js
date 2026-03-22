@@ -18,6 +18,7 @@ angular.module('learningPortalApp')
   $scope.tab                = 'practicals';
   $scope.editPracticals     = [];
   $scope.uploadAllowed      = false;
+  $scope.deadline           = '';
   $scope.submissions        = [];
   $scope.saving             = false;
   $scope.saveMsg            = '';
@@ -26,6 +27,7 @@ angular.module('learningPortalApp')
   $scope.theoryUnits        = [];
   $scope.notifications      = [];
   $scope.unreadCount        = 0;
+  $scope.studentProgress    = [];
 
   // Load subjects
   if (user.role === 'admin') {
@@ -67,6 +69,7 @@ angular.module('learningPortalApp')
   function loadUploadSetting(subjectId) {
     FirebaseService.getUploadSettings(subjectId).then(function(s) {
       $scope.uploadAllowed = s.uploadAllowed || false;
+      $scope.deadline = s.deadline || '';
     });
   }
 
@@ -85,6 +88,9 @@ angular.module('learningPortalApp')
         $scope.loadingSubmissions = false;
       });
     }
+    if (t === 'progress' && $scope.selected.id) {
+      $scope.loadStudentProgress();
+    }
     if (t === 'notifications') {
       loadNotifications();
     }
@@ -101,7 +107,7 @@ angular.module('learningPortalApp')
   $scope.savePracticals = function() {
     if (!$scope.selected.id) return;
     $scope.saving = true; $scope.saveMsg = '';
-    FirebaseService.savePracticals($scope.selected.id, $scope.editPracticals).then(function() {
+    FirebaseService.savePracticals($scope.selected.id, $scope.editPracticals, user.regNo).then(function() {
       $scope.saving = false;
       $scope.saveMsg = 'Practicals saved successfully!';
       setTimeout(function() { $scope.$apply(function() { $scope.saveMsg = ''; }); }, 3000);
@@ -109,7 +115,23 @@ angular.module('learningPortalApp')
   };
 
   $scope.toggleUpload = function() {
-    FirebaseService.setUploadAllowed($scope.selected.id, $scope.uploadAllowed);
+    FirebaseService.setUploadAllowed($scope.selected.id, $scope.uploadAllowed, $scope.deadline);
+  };
+
+  $scope.saveDeadline = function() {
+    FirebaseService.setUploadAllowed($scope.selected.id, $scope.uploadAllowed, $scope.deadline).then(function() {
+      $scope.saveMsg = 'Deadline saved!';
+      setTimeout(function() { $scope.$apply(function() { $scope.saveMsg = ''; }); }, 2000);
+    });
+  };
+
+  // Student progress per subject
+  $scope.studentProgress = [];
+  $scope.loadStudentProgress = function() {
+    if (!$scope.selected.id) return;
+    FirebaseService.getAllStudentProgress($scope.selected.id).then(function(list) {
+      $scope.studentProgress = list;
+    });
   };
 
   // Notifications

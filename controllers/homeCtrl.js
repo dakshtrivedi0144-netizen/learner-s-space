@@ -1,9 +1,46 @@
 angular.module('learningPortalApp')
-.controller('HomeCtrl', ['$scope', '$location', function($scope, $location) {
+.controller('HomeCtrl', ['$scope', '$location', 'FirebaseService', function($scope, $location, FirebaseService) {
   var user = JSON.parse(localStorage.getItem('ulp_session') || 'null');
   if (!user) { $location.path('/login'); return; }
   if (user.role === 'admin') { $location.path('/admin'); return; }
   if (user.role === 'faculty') { $location.path('/faculty'); return; }
+
+  $scope.user = user;
+  $scope.announcements = [];
+  $scope.bookmarks = [];
+
+  // Load announcements
+  FirebaseService.getAnnouncements().then(function(list) {
+    $scope.announcements = list;
+  });
+
+  // Load bookmarks
+  FirebaseService.getBookmarks(user.regNo).then(function(list) {
+    $scope.bookmarks = list;
+  });
+
+  // Progress rings per subject
+  var subjects = ['angularjs', 'cloud-computing', 'dm-dw'];
+  var subjectNames = { 'angularjs':'AngularJS', 'cloud-computing':'Cloud Computing', 'dm-dw':'DM & DW' };
+  var subjectIcons = { 'angularjs':'🅰️', 'cloud-computing':'☁️', 'dm-dw':'⛏️' };
+
+  FirebaseService.getAnalytics().then(function(data) {
+    $scope.progressRings = subjects.map(function(s) {
+      var key = 'ulp_progress_' + s;
+      var prog = {};
+      try { prog = JSON.parse(localStorage.getItem(key)) || {}; } catch(e) {}
+      var done  = Object.values(prog).filter(function(p) { return p.completed; }).length;
+      var total = (data.totalPracticals[s] || 1);
+      var pct   = Math.round(done / total * 100);
+      var circ  = 2 * Math.PI * 36; // r=36
+      return {
+        id: s, name: subjectNames[s], icon: subjectIcons[s],
+        done: done, total: total, pct: pct,
+        dash: (pct / 100 * circ).toFixed(1),
+        gap:  (circ - pct / 100 * circ).toFixed(1)
+      };
+    });
+  });
 
   $scope.semesters = [
     { id: 3, label: 'Semester III', desc: 'Data Structures, OOP, Digital Electronics...' },

@@ -1,26 +1,42 @@
 <div class="practicals-page">
+
   <div class="page-header">
-    <h2>Data Mining & DW Lab Tracker</h2>
+    <h2>⛏️ Data Mining & DW — Lab Tracker</h2>
     <div class="progress-summary">
-      <span class="progress-count">Completed: {{ completedCount() }} / 15</span>
+      <span class="progress-count">Completed: {{ completedCount() }} / {{ (practicals || []).length }}</span>
       <div class="progress-bar-wrap">
-        <div class="progress-bar-fill" ng-style="{'width': (completedCount() / 15 * 100) + '%'}"></div>
+        <div class="progress-bar-fill" ng-style="{'width': ((practicals||[]).length ? (completedCount() / practicals.length * 100) : 0) + '%'}"></div>
       </div>
     </div>
   </div>
+
   <div class="practicals-list">
-    <div class="practical-item" ng-repeat="p in practicals track by p.id" ng-class="{'practical-done': p.completed}">
+    <div class="practical-item" ng-repeat="p in practicals track by p.id"
+         ng-class="{'practical-done': p.completed}">
+
       <div class="practical-header">
         <span class="practical-num">{{ p.id }}.</span>
         <span class="practical-title-text">{{ p.title }}</span>
         <span class="status-badge" ng-class="p.completed ? 'badge-done' : 'badge-pending'">
-          {{ p.completed ? 'Done' : 'Pending' }}
+          {{ p.completed ? '✓ Done' : 'Pending' }}
         </span>
         <div class="practical-actions">
-          <button class="btn-code" ng-click="toggleCode(p)">{{ p.showCode ? '▲ Hide' : '▼ View Code' }}</button>
-          <button class="toggle-btn" ng-click="toggleComplete(p)">{{ p.completed ? 'Mark Pending' : 'Mark Done' }}</button>
+          <button class="btn-bookmark" ng-click="toggleBookmark(p)" title="{{ p.bookmarked ? 'Remove bookmark' : 'Bookmark' }}">
+            {{ p.bookmarked ? '🔖' : '📌' }}
+          </button>
+          <button class="btn-timer" ng-click="toggleTimer(p)" title="Study Timer">
+            {{ p.timerRunning ? '⏸' : '▶' }} {{ formatTime(p.timerSeconds) }}
+          </button>
+          <button class="btn-timer-reset" ng-click="resetTimer(p)" ng-if="p.timerSeconds > 0" title="Reset timer">↺</button>
+          <button class="btn-code" ng-click="toggleCode(p)">
+            {{ p.showCode ? '▲ Hide' : '▼ Code' }}
+          </button>
+          <button class="toggle-btn" ng-click="toggleComplete(p)">
+            {{ p.completed ? 'Undo' : 'Mark Done' }}
+          </button>
         </div>
       </div>
+
       <div class="practical-detail" ng-if="p.showCode">
         <p class="aim-text"><strong>Aim:</strong> {{ p.aim }}</p>
         <div class="code-block">
@@ -32,6 +48,8 @@
                  ng-model="p.notes" ng-change="saveNotes()" />
         </div>
       </div>
+
     </div>
   </div>
+
 </div>

@@ -1,5 +1,5 @@
 angular.module('learningPortalApp')
-.controller('LabCtrl', ['$scope', '$location', 'FirebaseService', function($scope, $location, FirebaseService) {
+.controller('LabCtrl', ['$scope', '$location', '$interval', 'FirebaseService', function($scope, $location, $interval, FirebaseService) {
 
   var user = JSON.parse(localStorage.getItem('ulp_session') || 'null');
   if (!user) { $location.path('/login'); return; }
@@ -8,42 +8,8 @@ angular.module('learningPortalApp')
 
   var SUBJECT_ID   = 'angularjs';
   var PROGRESS_KEY = 'ulp_progress_' + SUBJECT_ID;
+  var timerIntervals = {};
 
-  // ── Default practicals (used if faculty hasn't saved any) ──
-  var defaultPracticals = [
-    { title:'Hello World in AngularJS', aim:'Create a basic AngularJS application that displays Hello World.', code:'<!DOCTYPE html>\n<html ng-app>\n<head>\n  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.3/angular.min.js"></script>\n</head>\n<body>\n  <h1>{{ "Hello, World!" }}</h1>\n</body>\n</html>' },
-    { title:'Two-way Data Binding with ng-model', aim:'Demonstrate two-way data binding using ng-model.', code:'<div ng-app ng-controller="MyCtrl">\n  <input type="text" ng-model="name" placeholder="Enter name" />\n  <p>Hello, {{ name }}!</p>\n</div>\n<script>\nfunction MyCtrl($scope) { $scope.name = ""; }\n</script>' },
-    { title:'Using ng-bind and Expressions', aim:'Use ng-bind and AngularJS expressions to display data.', code:'<div ng-app ng-controller="MyCtrl">\n  <p ng-bind="message"></p>\n  <p>Sum: {{ 10 + 20 }}</p>\n</div>\n<script>\nfunction MyCtrl($scope) { $scope.message = "Welcome to AngularJS!"; }\n</script>' },
-    { title:'Applying Built-in Filters: lowercase, uppercase', aim:'Apply lowercase and uppercase filters to strings.', code:'<div ng-app>\n  <p>{{ "Hello World" | lowercase }}</p>\n  <p>{{ "Hello World" | uppercase }}</p>\n</div>' },
-    { title:'Applying the currency and date Filters', aim:'Format numbers as currency and dates using built-in filters.', code:'<div ng-app ng-controller="MyCtrl">\n  <p>Price: {{ price | currency:"₹" }}</p>\n  <p>Today: {{ today | date:"dd/MM/yyyy" }}</p>\n</div>\n<script>\nfunction MyCtrl($scope) { $scope.price = 1999.99; $scope.today = new Date(); }\n</script>' },
-    { title:'Using the orderBy Filter', aim:'Sort a list of objects using the orderBy filter.', code:'<div ng-app ng-controller="MyCtrl">\n  <li ng-repeat="s in students | orderBy:\'marks\'">{{ s.name }} - {{ s.marks }}</li>\n</div>\n<script>\nfunction MyCtrl($scope) { $scope.students = [{name:"Alice",marks:85},{name:"Bob",marks:72},{name:"Carol",marks:91}]; }\n</script>' },
-    { title:'Using the filter Filter for Search', aim:'Filter a list dynamically using the filter filter with ng-model.', code:'<div ng-app ng-controller="MyCtrl">\n  <input ng-model="search" placeholder="Search..." />\n  <li ng-repeat="item in items | filter:search">{{ item }}</li>\n</div>\n<script>\nfunction MyCtrl($scope) { $scope.items = ["Apple","Banana","Cherry","Date"]; }\n</script>' },
-    { title:'ng-repeat with Arrays', aim:'Render a list of array items using ng-repeat.', code:'<div ng-app ng-controller="MyCtrl">\n  <li ng-repeat="lang in languages">{{ lang }}</li>\n</div>\n<script>\nfunction MyCtrl($scope) { $scope.languages = ["JavaScript","Python","Java","AngularJS"]; }\n</script>' },
-    { title:'ng-repeat with Objects', aim:'Iterate over object key-value pairs using ng-repeat.', code:'<div ng-app ng-controller="MyCtrl">\n  <p ng-repeat="(key, val) in student"><strong>{{ key }}:</strong> {{ val }}</p>\n</div>\n<script>\nfunction MyCtrl($scope) { $scope.student = { name:"Alice", roll:"101", branch:"CE" }; }\n</script>' },
-    { title:'ng-if, ng-show and ng-hide Directives', aim:'Conditionally show/hide elements using ng-if, ng-show, ng-hide.', code:'<div ng-app ng-controller="MyCtrl">\n  <button ng-click="show = !show">Toggle</button>\n  <p ng-if="show">ng-if: in DOM only when true</p>\n  <p ng-show="show">ng-show: always in DOM</p>\n</div>\n<script>\nfunction MyCtrl($scope) { $scope.show = false; }\n</script>' },
-    { title:'ng-class and ng-style Directives', aim:'Dynamically apply CSS classes and styles.', code:'<div ng-app ng-controller="MyCtrl">\n  <p ng-class="{highlight: isHighlighted}">Dynamic Classes</p>\n  <p ng-style="{color: textColor}">Dynamic Style</p>\n</div>\n<script>\nfunction MyCtrl($scope) { $scope.isHighlighted = true; $scope.textColor = "blue"; }\n</script>' },
-    { title:'Creating a Custom Element Directive', aim:'Create a custom element directive that renders a greeting card.', code:'<div ng-app="myApp">\n  <greeting-card></greeting-card>\n</div>\n<script>\nangular.module("myApp",[])\n  .directive("greetingCard", function() {\n    return { restrict:"E", template:"<div><h3>Welcome!</h3></div>" };\n  });\n</script>' },
-    { title:'Creating a Custom Attribute Directive', aim:'Create a custom attribute directive that highlights an element.', code:'<div ng-app="myApp">\n  <p highlight-text>Highlighted by directive.</p>\n</div>\n<script>\nangular.module("myApp",[])\n  .directive("highlightText", function() {\n    return { restrict:"A", link: function(scope, el) { el.css({background:"yellow"}); } };\n  });\n</script>' },
-    { title:'Directive with Isolate Scope', aim:'Create a directive with isolate scope to pass data via attributes.', code:'<div ng-app="myApp" ng-controller="MyCtrl">\n  <user-card name="username" role="userrole"></user-card>\n</div>\n<script>\nangular.module("myApp",[])\n  .controller("MyCtrl", function($scope) { $scope.username="Alice"; $scope.userrole="Admin"; })\n  .directive("userCard", function() {\n    return { restrict:"E", scope:{name:"=",role:"="}, template:"<div><b>{{ name }}</b> — {{ role }}</div>" };\n  });\n</script>' },
-    { title:'Directive with Transclusion', aim:'Use ng-transclude to wrap content inside a custom directive.', code:'<div ng-app="myApp">\n  <panel-box><p>Transcluded content.</p></panel-box>\n</div>\n<script>\nangular.module("myApp",[])\n  .directive("panelBox", function() {\n    return { restrict:"E", transclude:true, template:"<div style=\'border:2px solid #c0392b;padding:12px\'><ng-transclude></ng-transclude></div>" };\n  });\n</script>' },
-    { title:'Event Handling: ng-click', aim:'Handle button click events using ng-click.', code:'<div ng-app ng-controller="MyCtrl">\n  <p>Count: {{ count }}</p>\n  <button ng-click="increment()">Increment</button>\n  <button ng-click="reset()">Reset</button>\n</div>\n<script>\nfunction MyCtrl($scope) { $scope.count=0; $scope.increment=function(){$scope.count++;}; $scope.reset=function(){$scope.count=0;}; }\n</script>' },
-    { title:'Event Handling: ng-keyup and ng-keydown', aim:'Capture keyboard events using ng-keyup and ng-keydown.', code:'<div ng-app ng-controller="MyCtrl">\n  <input ng-model="text" ng-keyup="onKeyUp($event)" placeholder="Type..." />\n  <p>Last key: {{ lastKey }}</p>\n</div>\n<script>\nfunction MyCtrl($scope) { $scope.text=""; $scope.lastKey=""; $scope.onKeyUp=function(e){$scope.lastKey=e.key;}; }\n</script>' },
-    { title:'Parent and Child Controllers with Scope Inheritance', aim:'Demonstrate scope inheritance between parent and child controllers.', code:'<div ng-app ng-controller="ParentCtrl">\n  <p>Parent: {{ parentMsg }}</p>\n  <div ng-controller="ChildCtrl">\n    <p>Child sees: {{ parentMsg }}</p>\n    <p>Child own: {{ childMsg }}</p>\n  </div>\n</div>\n<script>\nfunction ParentCtrl($scope){$scope.parentMsg="I am the parent";}\nfunction ChildCtrl($scope){$scope.childMsg="I am the child";}\n</script>' },
-    { title:'AngularJS Form: pristine, dirty, touched States', aim:'Track form state using $pristine, $dirty, and $touched.', code:'<div ng-app ng-controller="MyCtrl">\n  <form name="myForm">\n    <input name="email" type="email" ng-model="email" required />\n    <p>Pristine: {{ myForm.$pristine }}</p>\n    <p>Dirty: {{ myForm.$dirty }}</p>\n    <p>Valid: {{ myForm.$valid }}</p>\n  </form>\n</div>\n<script>function MyCtrl($scope){$scope.email="";}</script>' },
-    { title:'Form Validation with required and ng-minlength', aim:'Validate form fields using required and ng-minlength.', code:'<div ng-app ng-controller="MyCtrl">\n  <form name="myForm" novalidate>\n    <input name="username" ng-model="username" required ng-minlength="3" />\n    <span ng-if="myForm.username.$error.required">Required!</span>\n    <span ng-if="myForm.username.$error.minlength">Min 3 chars!</span>\n    <button ng-disabled="myForm.$invalid">Submit</button>\n  </form>\n</div>\n<script>function MyCtrl($scope){$scope.username="";}</script>' },
-    { title:'Form Validation with ng-pattern', aim:'Validate input using a regular expression with ng-pattern.', code:'<div ng-app ng-controller="MyCtrl">\n  <form name="myForm" novalidate>\n    <input name="phone" ng-model="phone" required ng-pattern="/^[0-9]{10}$/" />\n    <span ng-if="myForm.phone.$error.pattern">Enter valid 10-digit number.</span>\n    <button ng-disabled="myForm.$invalid">Submit</button>\n  </form>\n</div>\n<script>function MyCtrl($scope){$scope.phone="";}</script>' },
-    { title:'ng-invalid and ng-valid CSS Feedback', aim:'Use ng-invalid and ng-valid CSS classes for visual feedback.', code:'<style>\n  input.ng-invalid.ng-touched { border: 2px solid red; }\n  input.ng-valid.ng-dirty { border: 2px solid green; }\n</style>\n<div ng-app ng-controller="MyCtrl">\n  <form name="myForm" novalidate>\n    <input name="email" type="email" ng-model="email" required />\n  </form>\n</div>\n<script>function MyCtrl($scope){$scope.email="";}</script>' },
-    { title:'Custom Form Validator', aim:'Create a custom validator directive for form fields.', code:'<div ng-app="myApp" ng-controller="MyCtrl">\n  <form name="myForm" novalidate>\n    <input name="code" ng-model="code" no-spaces required />\n    <span ng-if="myForm.code.$error.noSpaces">No spaces allowed!</span>\n    <button ng-disabled="myForm.$invalid">Submit</button>\n  </form>\n</div>\n<script>\nangular.module("myApp",[])\n  .directive("noSpaces", function() {\n    return { require:"ngModel", link: function(scope,el,attrs,ctrl) {\n      ctrl.$validators.noSpaces = function(val) { return val ? val.indexOf(" ")===-1 : true; };\n    }};\n  })\n  .controller("MyCtrl", function($scope){$scope.code="";});\n</script>' },
-    { title:'Configuring $routeProvider for SPA', aim:'Configure client-side routing using $routeProvider.', code:'angular.module("myApp",["ngRoute"])\n  .config(["$routeProvider", function($rp) {\n    $rp\n      .when("/home", { template:"<h2>Home</h2>", controller:"HomeCtrl" })\n      .when("/about", { template:"<h2>About</h2>" })\n      .otherwise({ redirectTo:"/home" });\n  }]);\n// HTML: <a href="#!/home">Home</a> <div ng-view></div>' },
-    { title:'Creating Multiple Views with ng-view', aim:'Use ng-view as the outlet for SPA route templates.', code:'<!-- index.html -->\n<html ng-app="myApp">\n<body>\n  <a href="#!/dashboard">Dashboard</a>\n  <a href="#!/profile">Profile</a>\n  <div ng-view></div>\n</body>\n</html>\n// app.js\nangular.module("myApp",["ngRoute"])\n  .config(["$routeProvider", function($rp) {\n    $rp.when("/dashboard",{template:"<h2>Dashboard</h2>"})\n       .when("/profile",{template:"<h2>Profile</h2>"})\n       .otherwise({redirectTo:"/dashboard"});\n  }]);' },
-    { title:'Using $http to Fetch JSON Data', aim:'Fetch data from a JSON file using the $http service.', code:'angular.module("myApp",[])\n  .controller("MyCtrl",["$scope","$http",function($scope,$http){\n    $http.get("data/users.json").then(function(res){ $scope.users=res.data; });\n  }]);\n// HTML: <li ng-repeat="u in users">{{ u.name }}</li>' },
-    { title:'Handling $http Errors', aim:'Handle HTTP errors gracefully using .catch().', code:'angular.module("myApp",[])\n  .controller("MyCtrl",["$scope","$http",function($scope,$http){\n    $http.get("data/items.json")\n      .then(function(res){ $scope.data=res.data; })\n      .catch(function(err){ $scope.error="Failed: "+err.status; });\n  }]);\n// HTML: <p ng-if="error" style="color:red">{{ error }}</p>' },
-    { title:'Using $q and Promises', aim:'Use $q to create and chain promises for async operations.', code:'angular.module("myApp",[])\n  .controller("MyCtrl",["$scope","$q","$timeout",function($scope,$q,$timeout){\n    function asyncTask(){\n      var d=$q.defer();\n      $timeout(function(){ d.resolve("Done!"); },1500);\n      return d.promise;\n    }\n    asyncTask().then(function(msg){ $scope.result=msg; });\n  }]);\n// HTML: <p>{{ result }}</p>' },
-    { title:'Creating a Reusable AngularJS Service', aim:'Create a reusable service and inject it into a controller.', code:'angular.module("myApp",[])\n  .service("MathService", function(){\n    this.square=function(n){return n*n;};\n    this.cube=function(n){return n*n*n;};\n  })\n  .controller("MyCtrl",["$scope","MathService",function($scope,MathService){\n    $scope.square=MathService.square(4);\n    $scope.cube=MathService.cube(4);\n  }]);\n// HTML: <p>Square: {{ square }}</p>' },
-    { title:'Dependency Injection in Controllers and Services', aim:'Demonstrate explicit Dependency Injection using array notation.', code:'angular.module("myApp",[])\n  .service("GreetService", function(){\n    this.greet=function(name){ return "Hello, "+name+"!"; };\n  })\n  .controller("MyCtrl",["$scope","GreetService",function($scope,GreetService){\n    $scope.message=GreetService.greet("BTech Student");\n  }]);\n// HTML: <p>{{ message }}</p>' }
-  ];
-
-  // ── Progress tracking (per-student, stored separately) ──
   function loadProgress() {
     try { return JSON.parse(localStorage.getItem(PROGRESS_KEY)) || {}; } catch(e) { return {}; }
   }
@@ -55,20 +21,69 @@ angular.module('learningPortalApp')
 
   function buildList(source) {
     var progress = loadProgress();
-    $scope.practicals = source.map(function(p, i) {
-      var id = i + 1, s = progress[id] || {};
-      return { id:id, title:p.title, aim:p.aim, code:p.code,
-               completed: s.completed||false, notes: s.notes||'', showCode:false };
+    FirebaseService.getBookmarks(user.regNo).then(function(bookmarks) {
+      FirebaseService.getTimers(user.regNo).then(function(timers) {
+        $scope.practicals = source.map(function(p, i) {
+          var id = i + 1, s = progress[id] || {};
+          var bmId = SUBJECT_ID + '_' + id;
+          return {
+            id: id, title: p.title, aim: p.aim, code: p.code,
+            completed: s.completed || false, notes: s.notes || '', showCode: false,
+            bookmarked: !!(bookmarks || []).find(function(b) { return b.id === bmId; }),
+            timerSeconds: timers[bmId] || 0, timerRunning: false
+          };
+        });
+      });
     });
   }
 
-  // Load from faculty-saved data first, fall back to defaults
   FirebaseService.getPracticals(SUBJECT_ID).then(function(list) {
-    buildList(list && list.length ? list : defaultPracticals);
+    buildList(list && list.length ? list : []);
   });
 
   $scope.toggleComplete = function(p) { p.completed = !p.completed; saveProgress(); };
   $scope.toggleCode     = function(p) { p.showCode = !p.showCode; };
   $scope.saveNotes      = function()  { saveProgress(); };
-  $scope.completedCount = function()  { return $scope.practicals.filter(function(p){return p.completed;}).length; };
+  $scope.completedCount = function()  {
+    return ($scope.practicals || []).filter(function(p) { return p.completed; }).length;
+  };
+
+  $scope.toggleBookmark = function(p) {
+    var bmId = SUBJECT_ID + '_' + p.id;
+    FirebaseService.toggleBookmark(user.regNo, { id: bmId, title: p.title, subject: SUBJECT_ID, practicalId: p.id }).then(function(added) {
+      p.bookmarked = added;
+    });
+  };
+
+  $scope.toggleTimer = function(p) {
+    var bmId = SUBJECT_ID + '_' + p.id;
+    if (p.timerRunning) {
+      $interval.cancel(timerIntervals[p.id]);
+      timerIntervals[p.id] = null;
+      p.timerRunning = false;
+      FirebaseService.saveTimer(user.regNo, bmId, p.timerSeconds);
+    } else {
+      p.timerRunning = true;
+      timerIntervals[p.id] = $interval(function() {
+        p.timerSeconds++;
+      }, 1000);
+    }
+  };
+
+  $scope.resetTimer = function(p) {
+    var bmId = SUBJECT_ID + '_' + p.id;
+    if (timerIntervals[p.id]) { $interval.cancel(timerIntervals[p.id]); timerIntervals[p.id] = null; }
+    p.timerRunning = false;
+    p.timerSeconds = 0;
+    FirebaseService.saveTimer(user.regNo, bmId, 0);
+  };
+
+  $scope.formatTime = function(s) {
+    var h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), sec = s % 60;
+    return (h > 0 ? h + ':' : '') + (m < 10 ? '0' : '') + m + ':' + (sec < 10 ? '0' : '') + sec;
+  };
+
+  $scope.$on('$destroy', function() {
+    Object.values(timerIntervals).forEach(function(t) { if (t) $interval.cancel(t); });
+  });
 }]);

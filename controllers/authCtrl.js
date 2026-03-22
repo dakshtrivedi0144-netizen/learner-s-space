@@ -3,10 +3,14 @@ angular.module('learningPortalApp')
 
   var SESSION_KEY = 'ulp_session';
 
-  // Redirect if already logged in
   if (localStorage.getItem(SESSION_KEY)) {
-    $location.path('/home');
-    return;
+    var existing = JSON.parse(localStorage.getItem(SESSION_KEY));
+    if (existing) {
+      if (existing.role === 'admin') $location.path('/admin');
+      else if (existing.role === 'faculty') $location.path('/faculty');
+      else $location.path('/home');
+      return;
+    }
   }
 
   $scope.mode = 'login';
@@ -15,6 +19,7 @@ angular.module('learningPortalApp')
   $scope.error = '';
   $scope.success = '';
   $scope.loading = false;
+  $scope.pendingApproval = false;
 
   $scope.faculties = [
     { name: 'Faculty of Engineering & Technology', branches: ['Computer Engineering', 'Information Technology', 'Electronics & Communication', 'Mechanical Engineering', 'Civil Engineering', 'Electrical Engineering'] },
@@ -34,9 +39,9 @@ angular.module('learningPortalApp')
   };
 
   $scope.register = function() {
-    $scope.error = ''; $scope.success = '';
+    $scope.error = ''; $scope.success = ''; $scope.pendingApproval = false;
     var r = $scope.reg;
-    if (!r.name || !r.regNo || !r.faculty || !r.branch || !r.semester || !r.role || !r.password || !r.confirmPassword) {
+    if (!r.name || !r.regNo || !r.faculty || !r.branch || !r.semester || !r.password || !r.confirmPassword) {
       $scope.error = 'Please fill in all required fields.'; return;
     }
     if (r.password !== r.confirmPassword) {
@@ -46,11 +51,12 @@ angular.module('learningPortalApp')
       $scope.error = 'Password must be at least 6 characters.'; return;
     }
     $scope.loading = true;
-    FirebaseService.register(r).then(function() {
+
+    // All self-registrations go to pending approval queue
+    FirebaseService.submitPendingRegistration(r).then(function() {
       $scope.loading = false;
-      $scope.success = 'Account created successfully! Please login.';
+      $scope.pendingApproval = true;
       $scope.reg = {};
-      $scope.mode = 'login';
     }).catch(function(err) {
       $scope.loading = false;
       $scope.error = err;
@@ -58,7 +64,7 @@ angular.module('learningPortalApp')
   };
 
   $scope.login = function() {
-    $scope.error = ''; $scope.success = '';
+    $scope.error = ''; $scope.success = ''; $scope.pendingApproval = false;
     if (!$scope.loginData.regNo || !$scope.loginData.password) {
       $scope.error = 'Please enter registration number and password.'; return;
     }
@@ -66,7 +72,9 @@ angular.module('learningPortalApp')
     FirebaseService.login($scope.loginData.regNo, $scope.loginData.password).then(function(user) {
       $scope.loading = false;
       localStorage.setItem(SESSION_KEY, JSON.stringify(user));
-      $location.path('/home');
+      if (user.role === 'admin') $location.path('/admin');
+      else if (user.role === 'faculty') $location.path('/faculty');
+      else $location.path('/home');
     }).catch(function(err) {
       $scope.loading = false;
       $scope.error = err;
