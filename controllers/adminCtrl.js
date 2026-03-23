@@ -1,5 +1,5 @@
 angular.module('learningPortalApp')
-.controller('AdminCtrl', ['$scope', '$location', '$timeout', 'FirebaseService', function($scope, $location, $timeout, FirebaseService) {
+.controller('AdminCtrl', ['$scope', '$location', '$timeout', function($scope, $location, $timeout) {
 
   var SESSION_KEY = 'ulp_session';
   var user = JSON.parse(localStorage.getItem(SESSION_KEY) || 'null');
@@ -11,54 +11,50 @@ angular.module('learningPortalApp')
     { id: 'dm-dw',           name: 'Data Mining & DW', icon: '⛏️' }
   ];
 
+  // ── localStorage helpers ──────────────────────────────
+  function lsGet(key)    { try { return JSON.parse(localStorage.getItem(key)) || {}; } catch(e) { return {}; } }
+  function lsArr(key)    { try { return JSON.parse(localStorage.getItem(key)) || []; } catch(e) { return []; } }
+  function lsSet(key, v) { localStorage.setItem(key, JSON.stringify(v)); }
+
+  function addAudit(action, detail) {
+    var log = lsArr('ulp_auditLog');
+    log.unshift({ id: Date.now(), action: action, by: user.regNo, detail: detail, at: new Date().toISOString() });
+    if (log.length > 200) log = log.slice(0, 200);
+    lsSet('ulp_auditLog', log);
+  }
+
+  // ── Scope init ────────────────────────────────────────
   $scope.allSubjects        = ALL_SUBJECTS;
-  $scope.users              = [];
-  $scope.facultyList        = [];
-  $scope.assignments        = {};
-  $scope.loading            = true;
-  $scope.error              = '';
+  $scope.tab                = 'dashboard';
   $scope.actionMsg          = '';
   $scope.searchTerm         = '';
   $scope.filterSem          = '';
   $scope.filterRole         = '';
-  $scope.tab                = 'dashboard';
 
   $scope.contentSubject     = ALL_SUBJECTS[0];
   $scope.contentPracticals  = [];
   $scope.contentTheory      = [];
-  $scope.loadingContent     = false;
 
-  $scope.allSubmissions     = [];
   $scope.subFilter          = '';
-  $scope.loadingSubmissions = false;
-
-  $scope.notifications      = [];
-  $scope.unreadCount        = 0;
-
   $scope.announcements      = [];
   $scope.newAnnouncement    = '';
-  $scope.postingAnnounce    = false;
-
   $scope.analytics          = null;
   $scope.chartBars          = [];
   $scope.auditLog           = [];
   $scope.pendingUsers       = [];
+  $scope.notifications      = [];
+  $scope.unreadCount        = 0;
 
-  // ── Initial load ──────────────────────────────────────
-  FirebaseService.getAllUsers().then(function(list) {
-    $scope.loading = false;
+  // ── Load users & assignments synchronously ────────────
+  function loadUsers() {
+    var users = lsGet('ulp_users');
+    var list = Object.values(users).sort(function(a,b) { return b.createdAt > a.createdAt ? 1 : -1; });
     $scope.users = list.map(function(u) { u.newRole = u.role || 'student'; return u; });
     $scope.facultyList = list.filter(function(u) { return u.role === 'faculty'; });
-  }).catch(function(err) { $scope.loading = false; $scope.error = err; });
-
-  FirebaseService.getAssignments().then(function(data) {
-    $scope.assignments = data;
-  });
-
-  loadNotifications();
-  loadAnalytics();
-  loadAnnouncements();
-  loadPending();
+  }
+  loadUsers();
+  $scope.assignments = lsGet('ulp_assignments');
+  $scope.loading = false;
 
   // ── Tab watcher ───────────────────────────────────────
   $scope.$watch('tab', function(t) {
@@ -67,21 +63,52 @@ angular.module('learningPortalApp')
     if (t === 'submissions')   { loadAllSubmissions(); }
     if (t === 'notifications') { loadNotifications(); }
     if (t === 'announcements') { loadAnnouncements(); }
-    if (t === 'audit')         { loadAuditLog(); }
-    if (t === 'pending')       { loadPending(); }
+    if (t === 'audit')         { $scope.auditLog = lsArr('ulp_auditLog'); }
+    if (t === 'pending')       { $scope.pendingUsers = lsArr('ulp_pendingUsers'); }
   });
 
   // ── Analytics ─────────────────────────────────────────
   function loadAnalytics() {
-    FirebaseService.getAnalytics().then(function(data) {
-      $scope.analytics = data;
-      var maxVal = Math.max(1, Math.max.apply(null, ALL_SUBJECTS.map(function(s) {
-        return data.submissionsBySubject[s.id] || 0;
-      })));
-      $scope.chartBars = ALL_SUBJECTS.map(function(s) {
-        var count = data.submissionsBySubject[s.id] || 0;
-        return { label: s.name.split(' ')[0], count: count, pct: Math.round(count / maxVal * 100) };
+    var users      = lsGet('ulp_users');
+    var manuals    = lsGet('ulp_labManuals');
+    var practicals = lsGet('ulp_practicals');
+    var studentList = Object.values(users).filter(function(u) { return u.role === 'student'; });
+    var subjects = ['angularjs', 'cloud-computing', 'dm-dw'];
+
+    var submissionsBySubject = {};
+    subjects.forEach(function(s) {
+      submissionsBySubject[s] = Object.values(manuals).filter(function(m) { return m.subjectId === s; }).length;
+    });
+    var totalPracticals = {};
+    subjects.forEach(function(s) { totalPracticals[s] = (practicals[s] || []).length; });
+
+    var studentStats = studentList.map(function(u) {
+      var done = 0, total = 0;
+      subjects.forEach(function(s) {
+        var prog = {};
+        try { prog = JSON.parse(localStorage.getItem('ulp_progress_' + s)) || {}; } catch(e) {}
+        done  += Object.values(prog).filter(function(p) { return p.completed; }).length;
+        total += (practicals[s] || []).length;
       });
+      return { name: u.name, regNo: u.regNo, done: done, total: total, pct: total ? Math.round(done/total*100) : 0 };
+    });
+    studentStats.sort(function(a,b) { return b.pct - a.pct; });
+
+    $scope.analytics = {
+      totalStudents: studentList.length,
+      totalFaculty: Object.values(users).filter(function(u) { return u.role === 'faculty'; }).length,
+      totalSubmissions: Object.values(manuals).length,
+      submissionsBySubject: submissionsBySubject,
+      totalPracticals: totalPracticals,
+      studentStats: studentStats
+    };
+
+    var maxVal = Math.max(1, Math.max.apply(null, ALL_SUBJECTS.map(function(s) {
+      return submissionsBySubject[s.id] || 0;
+    })));
+    $scope.chartBars = ALL_SUBJECTS.map(function(s) {
+      var count = submissionsBySubject[s.id] || 0;
+      return { label: s.name.split(' ')[0], count: count, pct: Math.round(count/maxVal*100) };
     });
   }
 
@@ -90,32 +117,23 @@ angular.module('learningPortalApp')
     $scope.contentSubject = s;
     loadContent(s.id);
   };
-
   function loadContent(subjectId) {
-    $scope.loadingContent = true;
-    FirebaseService.getPracticals(subjectId).then(function(list) {
-      $scope.contentPracticals = list || [];
-      $scope.loadingContent = false;
-    });
-    FirebaseService.getSyllabus(subjectId).then(function(data) {
-      $scope.contentTheory = data ? data.units || [] : [];
-    });
+    var practicals = lsGet('ulp_practicals');
+    $scope.contentPracticals = practicals[subjectId] || [];
+    var syllabus = lsGet('ulp_syllabus');
+    $scope.contentTheory = syllabus[subjectId] ? syllabus[subjectId].units || [] : [];
   }
 
   // ── Submissions ───────────────────────────────────────
   function loadAllSubmissions() {
-    $scope.loadingSubmissions = true;
-    FirebaseService.getAllLabManuals().then(function(list) {
-      $scope.allSubmissions = list;
-      $scope.loadingSubmissions = false;
-    });
+    var all = lsGet('ulp_labManuals');
+    $scope.allSubmissions = Object.values(all).sort(function(a,b) { return b.submittedAt > a.submittedAt ? 1 : -1; });
   }
-
+  $scope.allSubmissions = [];
   $scope.filteredSubmissions = function() {
     if (!$scope.subFilter) return $scope.allSubmissions;
     return $scope.allSubmissions.filter(function(s) { return s.subjectId === $scope.subFilter; });
   };
-
   $scope.subjectName = function(id) {
     var s = ALL_SUBJECTS.find(function(x) { return x.id === id; });
     return s ? s.icon + ' ' + s.name : id;
@@ -123,82 +141,79 @@ angular.module('learningPortalApp')
 
   // ── Announcements ─────────────────────────────────────
   function loadAnnouncements() {
-    $scope.announcements = JSON.parse(localStorage.getItem('ulp_announcements') || '[]');
+    $scope.announcements = lsArr('ulp_announcements');
   }
+  loadAnnouncements();
 
   $scope.postAnnouncement = function() {
     var text = ($scope.newAnnouncement || '').trim();
     if (!text) return;
-    var list = JSON.parse(localStorage.getItem('ulp_announcements') || '[]');
+    var list = lsArr('ulp_announcements');
     list.unshift({ id: Date.now(), text: text, by: user.name, createdAt: new Date().toISOString() });
-    localStorage.setItem('ulp_announcements', JSON.stringify(list));
+    lsSet('ulp_announcements', list);
+    addAudit('ANNOUNCEMENT', text.substring(0, 60));
     $scope.announcements = list;
     $scope.newAnnouncement = '';
-    $scope.actionMsg = '✅ Announcement posted!';
-    $timeout(function() { $scope.actionMsg = ''; }, 3000);
+    $scope.flash('✅ Announcement posted!');
   };
 
   $scope.deleteAnnouncement = function(id) {
-    var list = JSON.parse(localStorage.getItem('ulp_announcements') || '[]').filter(function(a) { return a.id !== id; });
-    localStorage.setItem('ulp_announcements', JSON.stringify(list));
+    var list = lsArr('ulp_announcements').filter(function(a) { return a.id !== id; });
+    lsSet('ulp_announcements', list);
     $scope.announcements = list;
   };
 
   // ── Audit Log ─────────────────────────────────────────
-  function loadAuditLog() {
-    FirebaseService.getAuditLog().then(function(list) {
-      $scope.auditLog = list;
-    });
-  }
+  // loaded in tab watcher
 
   // ── Pending Registrations ─────────────────────────────
-  function loadPending() {
-    FirebaseService.getPendingRegistrations().then(function(list) {
-      $scope.pendingUsers = list;
-    });
-  }
+  $scope.pendingUsers = lsArr('ulp_pendingUsers');
 
   $scope.approveUser = function(p) {
-    FirebaseService.approveRegistration(p.id, user.regNo).then(function() {
-      $scope.pendingUsers = $scope.pendingUsers.filter(function(x) { return x.id !== p.id; });
-      FirebaseService.getAllUsers().then(function(list) {
-        $scope.users = list.map(function(u) { u.newRole = u.role || 'student'; return u; });
-        $scope.facultyList = list.filter(function(u) { return u.role === 'faculty'; });
-      });
-      $scope.flash(p.name + ' approved and added as student.');
-    });
+    var pending = lsArr('ulp_pendingUsers');
+    var idx = pending.findIndex(function(x) { return x.id === p.id; });
+    if (idx === -1) return;
+    var users = lsGet('ulp_users');
+    users[p.regNo] = { name: p.name, regNo: p.regNo, faculty: p.faculty, branch: p.branch, semester: p.semester, role: 'student', password: p.password, createdAt: new Date().toISOString() };
+    lsSet('ulp_users', users);
+    pending.splice(idx, 1);
+    lsSet('ulp_pendingUsers', pending);
+    addAudit('APPROVE_REG', 'Approved: ' + p.regNo);
+    $scope.pendingUsers = pending;
+    loadUsers();
+    $scope.flash(p.name + ' approved.');
   };
 
   $scope.rejectUser = function(p) {
-    FirebaseService.rejectRegistration(p.id, user.regNo).then(function() {
-      $scope.pendingUsers = $scope.pendingUsers.filter(function(x) { return x.id !== p.id; });
-      $scope.flash('Registration rejected.');
-    });
+    var pending = lsArr('ulp_pendingUsers').filter(function(x) { return x.id !== p.id; });
+    lsSet('ulp_pendingUsers', pending);
+    addAudit('REJECT_REG', 'Rejected: ' + p.regNo);
+    $scope.pendingUsers = pending;
+    $scope.flash('Registration rejected.');
   };
 
   // ── Notifications ─────────────────────────────────────
   function loadNotifications() {
-    FirebaseService.getNotifications().then(function(list) {
-      $scope.notifications = list;
-      $scope.unreadCount = list.filter(function(n) { return n.readBy.indexOf(user.regNo) === -1; }).length;
-    });
+    var list = lsArr('ulp_notifications');
+    $scope.notifications = list;
+    $scope.unreadCount = list.filter(function(n) { return n.readBy.indexOf(user.regNo) === -1; }).length;
   }
+  loadNotifications();
 
   $scope.markRead = function(n) {
     if (n.readBy.indexOf(user.regNo) !== -1) return;
-    FirebaseService.markNotificationRead(n.id, user.regNo).then(function() {
-      n.readBy.push(user.regNo);
-      $scope.unreadCount = Math.max(0, $scope.unreadCount - 1);
-    });
+    var notifs = lsArr('ulp_notifications');
+    notifs.forEach(function(x) { if (x.id === n.id) x.readBy.push(user.regNo); });
+    lsSet('ulp_notifications', notifs);
+    n.readBy.push(user.regNo);
+    $scope.unreadCount = Math.max(0, $scope.unreadCount - 1);
   };
 
   $scope.markAllRead = function() {
-    $scope.notifications.forEach(function(n) {
-      if (n.readBy.indexOf(user.regNo) === -1) {
-        FirebaseService.markNotificationRead(n.id, user.regNo);
-        n.readBy.push(user.regNo);
-      }
-    });
+    var notifs = lsArr('ulp_notifications');
+    notifs.forEach(function(n) { if (n.readBy.indexOf(user.regNo) === -1) n.readBy.push(user.regNo); });
+    lsSet('ulp_notifications', notifs);
+    $scope.notifications.forEach(function(n) { if (n.readBy.indexOf(user.regNo) === -1) n.readBy.push(user.regNo); });
     $scope.unreadCount = 0;
   };
 
@@ -207,10 +222,10 @@ angular.module('learningPortalApp')
   // ── User management ───────────────────────────────────
   $scope.filteredUsers = function() {
     return $scope.users.filter(function(u) {
-      var t     = $scope.searchTerm.toLowerCase();
-      var ms    = !t || (u.name||'').toLowerCase().includes(t) || (u.regNo||'').toLowerCase().includes(t) || (u.branch||'').toLowerCase().includes(t);
-      var mSem  = !$scope.filterSem  || String(u.semester) === String($scope.filterSem);
-      var mRole = !$scope.filterRole || (u.role||'student') === $scope.filterRole;
+      var t = $scope.searchTerm.toLowerCase();
+      var ms   = !t || (u.name||'').toLowerCase().includes(t) || (u.regNo||'').toLowerCase().includes(t) || (u.branch||'').toLowerCase().includes(t);
+      var mSem = !$scope.filterSem  || String(u.semester) === String($scope.filterSem);
+      var mRole= !$scope.filterRole || (u.role||'student') === $scope.filterRole;
       return ms && mSem && mRole;
     });
   };
@@ -220,20 +235,25 @@ angular.module('learningPortalApp')
   };
 
   $scope.updateRole = function(u) {
-    FirebaseService.updateUserRole(u.regNo, u.newRole, user.regNo).then(function() {
-      u.role = u.newRole;
-      $scope.facultyList = $scope.users.filter(function(x) { return x.role === 'faculty'; });
-      $scope.flash(u.name + ' role updated to ' + u.newRole);
-    }).catch(function(err) { $scope.error = err; });
+    var users = lsGet('ulp_users');
+    if (!users[u.regNo]) return;
+    users[u.regNo].role = u.newRole;
+    lsSet('ulp_users', users);
+    addAudit('ROLE_CHANGE', u.regNo + ' → ' + u.newRole);
+    u.role = u.newRole;
+    $scope.facultyList = $scope.users.filter(function(x) { return x.role === 'faculty'; });
+    $scope.flash(u.name + ' role updated to ' + u.newRole);
   };
 
   $scope.deleteUser = function(u) {
     if (!confirm('Delete ' + u.name + ' (' + u.regNo + ')? This cannot be undone.')) return;
-    FirebaseService.deleteUser(u.regNo, user.regNo).then(function() {
-      $scope.users = $scope.users.filter(function(x) { return x.regNo !== u.regNo; });
-      $scope.facultyList = $scope.users.filter(function(x) { return x.role === 'faculty'; });
-      $scope.flash(u.name + ' deleted.');
-    }).catch(function(err) { $scope.error = err; });
+    var users = lsGet('ulp_users');
+    delete users[u.regNo];
+    lsSet('ulp_users', users);
+    addAudit('DELETE_USER', 'Deleted: ' + u.regNo);
+    $scope.users = $scope.users.filter(function(x) { return x.regNo !== u.regNo; });
+    $scope.facultyList = $scope.users.filter(function(x) { return x.role === 'faculty'; });
+    $scope.flash(u.name + ' deleted.');
   };
 
   // ── Subject assignment ────────────────────────────────
@@ -246,9 +266,8 @@ angular.module('learningPortalApp')
     var idx = $scope.assignments[regNo].indexOf(subjectId);
     if (idx === -1) { $scope.assignments[regNo].push(subjectId); }
     else            { $scope.assignments[regNo].splice(idx, 1); }
-    FirebaseService.setFacultySubjects(regNo, $scope.assignments[regNo]).then(function() {
-      $scope.flash('Assignment updated.');
-    });
+    lsSet('ulp_assignments', $scope.assignments);
+    $scope.flash('Assignment updated.');
   };
 
   $scope.assignedNames = function(regNo) {
@@ -265,4 +284,7 @@ angular.module('learningPortalApp')
     $scope.actionMsg = msg;
     $timeout(function() { $scope.actionMsg = ''; }, 3000);
   };
+
+  // ── Initial dashboard load ────────────────────────────
+  loadAnalytics();
 }]);
