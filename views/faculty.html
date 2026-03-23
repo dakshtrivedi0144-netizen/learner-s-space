@@ -10,6 +10,15 @@
     </div>
   </div>
 
+  <!-- Announcements from Admin -->
+  <div class="announce-strip" ng-if="announcements && announcements.length > 0">
+    <span class="announce-strip-icon">📢</span>
+    <div class="announce-strip-text">
+      <strong>{{ announcements[0].by }}:</strong> {{ announcements[0].text }}
+    </div>
+    <span class="announce-strip-time">{{ announcements[0].createdAt | date:'dd MMM' }}</span>
+  </div>
+
   <!-- Subject Selector -->
   <div class="faculty-section">
     <label class="section-label">Select Subject</label>

@@ -28,6 +28,7 @@ angular.module('learningPortalApp')
   $scope.notifications      = [];
   $scope.unreadCount        = 0;
   $scope.studentProgress    = [];
+  $scope.announcements      = [];
 
   // Load subjects
   if (user.role === 'admin') {
@@ -43,6 +44,11 @@ angular.module('learningPortalApp')
 
   // Load notifications on init
   loadNotifications();
+
+  // Load announcements
+  FirebaseService.getAnnouncements().then(function(list) {
+    $scope.announcements = list;
+  });
 
   function loadNotifications() {
     FirebaseService.getNotifications().then(function(list) {
