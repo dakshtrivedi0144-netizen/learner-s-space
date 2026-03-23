@@ -1,5 +1,5 @@
 angular.module('learningPortalApp')
-.controller('AdminCtrl', ['$scope', '$location', 'FirebaseService', function($scope, $location, FirebaseService) {
+.controller('AdminCtrl', ['$scope', '$location', '$timeout', 'FirebaseService', function($scope, $location, $timeout, FirebaseService) {
 
   var SESSION_KEY = 'ulp_session';
   var user = JSON.parse(localStorage.getItem(SESSION_KEY) || 'null');
@@ -133,18 +133,21 @@ angular.module('learningPortalApp')
     if (!text) return;
     $scope.postingAnnounce = true;
     FirebaseService.postAnnouncement(text, user.name).then(function() {
-      $scope.newAnnouncement = '';
-      $scope.postingAnnounce = false;
-      $scope.announcements = [];
-      loadAnnouncements();
-      $scope.actionMsg = 'Announcement posted successfully.';
-      setTimeout(function() { $scope.$apply(function() { $scope.actionMsg = ''; }); }, 3000);
+      $timeout(function() {
+        $scope.newAnnouncement = '';
+        $scope.postingAnnounce = false;
+        loadAnnouncements();
+        $scope.actionMsg = '✅ Announcement posted!';
+        $timeout(function() { $scope.actionMsg = ''; }, 3000);
+      });
     });
   };
 
   $scope.deleteAnnouncement = function(id) {
     FirebaseService.deleteAnnouncement(id).then(function() {
-      $scope.announcements = $scope.announcements.filter(function(a) { return a.id !== id; });
+      $timeout(function() {
+        $scope.announcements = $scope.announcements.filter(function(a) { return a.id !== id; });
+      });
     });
   };
 
@@ -267,9 +270,6 @@ angular.module('learningPortalApp')
   // ── Flash message ─────────────────────────────────────
   $scope.flash = function(msg) {
     $scope.actionMsg = msg;
-    setTimeout(function() {
-      if (!$scope.$$phase) { $scope.$apply(function() { $scope.actionMsg = ''; }); }
-      else { $scope.actionMsg = ''; }
-    }, 3000);
+    $timeout(function() { $scope.actionMsg = ''; }, 3000);
   };
 }]);

@@ -1,5 +1,5 @@
 angular.module('learningPortalApp')
-.factory('FirebaseService', [function() {
+.factory('FirebaseService', ['$timeout', function($timeout) {
 
   var KEYS = {
     users:         'ulp_users',
@@ -22,10 +22,21 @@ angular.module('learningPortalApp')
   function set(key, val) { localStorage.setItem(key, JSON.stringify(val)); }
 
   function resolved(val) {
-    return { then: function(fn) { var r = fn(val); return resolved(r); }, catch: function() { return this; } };
+    return {
+      then: function(fn) {
+        var next;
+        $timeout(function() { next._val = fn(val); }, 0);
+        next = resolved(undefined);
+        return next;
+      },
+      catch: function() { return this; }
+    };
   }
   function rejected(msg) {
-    return { then: function() { return this; }, catch: function(fn) { fn(msg); return this; } };
+    return {
+      then: function() { return this; },
+      catch: function(fn) { $timeout(function() { fn(msg); }, 0); return this; }
+    };
   }
 
   function addAudit(action, by, detail) {

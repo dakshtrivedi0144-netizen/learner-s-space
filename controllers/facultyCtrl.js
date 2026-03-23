@@ -1,5 +1,5 @@
 angular.module('learningPortalApp')
-.controller('FacultyCtrl', ['$scope', '$location', 'FirebaseService', function($scope, $location, FirebaseService) {
+.controller('FacultyCtrl', ['$scope', '$location', '$timeout', 'FirebaseService', function($scope, $location, $timeout, FirebaseService) {
 
   var SESSION_KEY = 'ulp_session';
   var user = JSON.parse(localStorage.getItem(SESSION_KEY) || 'null');
@@ -116,7 +116,7 @@ angular.module('learningPortalApp')
     FirebaseService.savePracticals($scope.selected.id, $scope.editPracticals, user.regNo).then(function() {
       $scope.saving = false;
       $scope.saveMsg = 'Practicals saved successfully!';
-      setTimeout(function() { $scope.$apply(function() { $scope.saveMsg = ''; }); }, 3000);
+      $timeout(function() { $scope.saveMsg = ''; }, 3000);
     }).catch(function(err) { $scope.saving = false; $scope.saveMsg = 'Error: ' + err; });
   };
 
@@ -127,7 +127,7 @@ angular.module('learningPortalApp')
   $scope.saveDeadline = function() {
     FirebaseService.setUploadAllowed($scope.selected.id, $scope.uploadAllowed, $scope.deadline).then(function() {
       $scope.saveMsg = 'Deadline saved!';
-      setTimeout(function() { $scope.$apply(function() { $scope.saveMsg = ''; }); }, 2000);
+      $timeout(function() { $scope.saveMsg = ''; }, 2000);
     });
   };
 
