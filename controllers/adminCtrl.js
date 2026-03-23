@@ -123,28 +123,25 @@ angular.module('learningPortalApp')
 
   // ── Announcements ─────────────────────────────────────
   function loadAnnouncements() {
-    FirebaseService.getAnnouncements().then(function(list) {
-      $scope.announcements = list;
-    });
+    $scope.announcements = JSON.parse(localStorage.getItem('ulp_announcements') || '[]');
   }
 
   $scope.postAnnouncement = function() {
     var text = ($scope.newAnnouncement || '').trim();
     if (!text) return;
-    $scope.postingAnnounce = true;
-    FirebaseService.postAnnouncement(text, user.name).then(function() {
-      $scope.newAnnouncement = '';
-      $scope.postingAnnounce = false;
-      loadAnnouncements();
-      $scope.actionMsg = '✅ Announcement posted!';
-      $timeout(function() { $scope.actionMsg = ''; }, 3000);
-    });
+    var list = JSON.parse(localStorage.getItem('ulp_announcements') || '[]');
+    list.unshift({ id: Date.now(), text: text, by: user.name, createdAt: new Date().toISOString() });
+    localStorage.setItem('ulp_announcements', JSON.stringify(list));
+    $scope.announcements = list;
+    $scope.newAnnouncement = '';
+    $scope.actionMsg = '✅ Announcement posted!';
+    $timeout(function() { $scope.actionMsg = ''; }, 3000);
   };
 
   $scope.deleteAnnouncement = function(id) {
-    FirebaseService.deleteAnnouncement(id).then(function() {
-      $scope.announcements = $scope.announcements.filter(function(a) { return a.id !== id; });
-    });
+    var list = JSON.parse(localStorage.getItem('ulp_announcements') || '[]').filter(function(a) { return a.id !== id; });
+    localStorage.setItem('ulp_announcements', JSON.stringify(list));
+    $scope.announcements = list;
   };
 
   // ── Audit Log ─────────────────────────────────────────
