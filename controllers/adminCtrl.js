@@ -133,21 +133,17 @@ angular.module('learningPortalApp')
     if (!text) return;
     $scope.postingAnnounce = true;
     FirebaseService.postAnnouncement(text, user.name).then(function() {
-      $timeout(function() {
-        $scope.newAnnouncement = '';
-        $scope.postingAnnounce = false;
-        loadAnnouncements();
-        $scope.actionMsg = '✅ Announcement posted!';
-        $timeout(function() { $scope.actionMsg = ''; }, 3000);
-      });
+      $scope.newAnnouncement = '';
+      $scope.postingAnnounce = false;
+      loadAnnouncements();
+      $scope.actionMsg = '✅ Announcement posted!';
+      $timeout(function() { $scope.actionMsg = ''; }, 3000);
     });
   };
 
   $scope.deleteAnnouncement = function(id) {
     FirebaseService.deleteAnnouncement(id).then(function() {
-      $timeout(function() {
-        $scope.announcements = $scope.announcements.filter(function(a) { return a.id !== id; });
-      });
+      $scope.announcements = $scope.announcements.filter(function(a) { return a.id !== id; });
     });
   };
 

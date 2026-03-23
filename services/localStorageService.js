@@ -24,10 +24,8 @@ angular.module('learningPortalApp')
   function resolved(val) {
     return {
       then: function(fn) {
-        var next;
-        $timeout(function() { next._val = fn(val); }, 0);
-        next = resolved(undefined);
-        return next;
+        $timeout(function() { fn(val); }, 0);
+        return resolved(val);
       },
       catch: function() { return this; }
     };
