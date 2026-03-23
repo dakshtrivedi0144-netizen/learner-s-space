@@ -129,13 +129,16 @@ angular.module('learningPortalApp')
   }
 
   $scope.postAnnouncement = function() {
-    if (!$scope.newAnnouncement.trim()) return;
+    var text = ($scope.newAnnouncement || '').trim();
+    if (!text) return;
     $scope.postingAnnounce = true;
-    FirebaseService.postAnnouncement($scope.newAnnouncement.trim(), user.name).then(function() {
+    FirebaseService.postAnnouncement(text, user.name).then(function() {
       $scope.newAnnouncement = '';
       $scope.postingAnnounce = false;
+      $scope.announcements = [];
       loadAnnouncements();
-      $scope.flash('Announcement posted successfully.');
+      $scope.actionMsg = 'Announcement posted successfully.';
+      setTimeout(function() { $scope.$apply(function() { $scope.actionMsg = ''; }); }, 3000);
     });
   };
 
@@ -264,6 +267,9 @@ angular.module('learningPortalApp')
   // ── Flash message ─────────────────────────────────────
   $scope.flash = function(msg) {
     $scope.actionMsg = msg;
-    setTimeout(function() { $scope.$apply(function() { $scope.actionMsg = ''; }); }, 3000);
+    setTimeout(function() {
+      if (!$scope.$$phase) { $scope.$apply(function() { $scope.actionMsg = ''; }); }
+      else { $scope.actionMsg = ''; }
+    }, 3000);
   };
 }]);

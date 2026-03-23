@@ -273,7 +273,7 @@
   <div ng-if="!loading && tab==='announcements'" class="announce-panel">
     <div class="announce-compose">
       <textarea ng-model="newAnnouncement" placeholder="Write an announcement for all students..." class="announce-textarea" rows="3"></textarea>
-      <button class="btn-save" ng-click="postAnnouncement()" ng-disabled="postingAnnounce || !newAnnouncement.trim()">
+      <button class="btn-save" ng-click="postAnnouncement()" ng-disabled="postingAnnounce || !(newAnnouncement && newAnnouncement.trim())">
         {{ postingAnnounce ? 'Posting...' : '📢 Post Announcement' }}
       </button>
     </div>
